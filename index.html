@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why does the torch light up? Grade 11 Electromagnetic Induction</title>
+<style>
+  :root{
+    --bone:#F7F3EC;
+    --bone-2:#EFE9DE;
+    --ink:#0B1B3A;
+    --volt:#1B45E8;
+    --volt-2:#0A2BB8;
+    --ember:#F04E23;
+    --aqua:#1FC7DE;
+    --dim:#6E7891;
+    --line:#DED7C8;
+    --white:#FFFFFF;
+
+    --display:"Arial Narrow","Helvetica Neue Condensed","Liberation Sans Narrow",system-ui,sans-serif;
+    --body:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+
+  body{
+    margin:0;
+    background:var(--bone);
+    color:var(--ink);
+    font-family:var(--body);
+    font-size:clamp(16px,1.05vw,19px);
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  .wrap{max-width:1240px;margin:0 auto;padding:0 clamp(20px,3.5vw,52px)}
+
+  /* ================= type ================= */
+  .display{
+    font-family:var(--display);
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:-.015em;
+    line-height:.92;
+    margin:0;
+  }
+  h1.display{font-size:clamp(52px,8.4vw,124px)}
+  h2.display{font-size:clamp(34px,5vw,72px);margin-bottom:16px}
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:clamp(10px,.72vw,12px);
+    letter-spacing:.26em;
+    text-transform:uppercase;
+    color:var(--dim);
+    margin:0 0 14px;
+  }
+  .rule-eyebrow{display:flex;align-items:center;gap:16px}
+  .rule-eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  p{margin:0 0 18px;max-width:64ch}
+  .lede{font-size:clamp(17px,1.35vw,22px);line-height:1.5;color:#243458;max-width:34ch}
+
+  /* ================= nav ================= */
+  nav{
+    position:relative;
+    z-index:5;
+    display:flex;
+    align-items:center;
+    gap:clamp(18px,3vw,46px);
+    padding:26px 0 0;
+  }
+  .mark{display:flex;align-items:center;gap:11px;flex:none}
+  .mark svg{display:block}
+  .mark span{
+    font-family:var(--display);
+    text-transform:uppercase;
+    font-weight:700;
+    letter-spacing:.04em;
+    font-size:19px;
+  }
+  .navlinks{display:flex;gap:clamp(14px,2.2vw,34px);margin-left:auto}
+  .navlinks a{
+    font-size:.92em;
+    color:var(--ink);
+    text-decoration:none;
+    padding-bottom:3px;
+    border-bottom:1.5px solid transparent;
+  }
+  .navlinks a:hover{border-bottom-color:var(--volt)}
+
+  /* ================= buttons ================= */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--body);
+    font-size:.96em;
+    font-weight:600;
+    padding:15px 26px;
+    border-radius:2px;
+    border:1.5px solid var(--ink);
+    background:var(--white);
+    color:var(--ink);
+    cursor:pointer;
+    text-decoration:none;
+    transition:background .16s,color .16s,border-color .16s,transform .16s;
+  }
+  .btn:hover:not(:disabled){background:var(--ink);color:var(--bone);transform:translateY(-1px)}
+  .btn:disabled{opacity:.32;cursor:not-allowed}
+  .btn-primary{background:var(--volt);border-color:var(--volt);color:#fff}
+  .btn-primary:hover:not(:disabled){background:var(--volt-2);border-color:var(--volt-2);color:#fff}
+  .btn-ghost{border-color:transparent;background:transparent;color:var(--volt);padding-left:6px}
+  .btn-ghost:hover:not(:disabled){background:transparent;color:var(--volt-2);transform:translateX(3px)}
+
+  .btn:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
+    outline:3px solid var(--ember);outline-offset:3px
+  }
+
+  /* ================= hero ================= */
+  .hero{position:relative;padding:clamp(38px,6vw,76px) 0 clamp(50px,7vw,96px)}
+  .sweep{
+    position:absolute;
+    top:-58vh;
+    right:-30vw;
+    width:104vw;
+    height:186vh;
+    background:linear-gradient(158deg,var(--volt) 8%,var(--volt-2) 92%);
+    border-radius:50%;
+    z-index:0;
+    pointer-events:none;
+  }
+  .hero-grid{
+    position:relative;
+    z-index:2;
+    display:grid;
+    grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);
+    gap:clamp(24px,4vw,60px);
+    align-items:center;
+  }
+  .hero-copy .accent{color:var(--volt)}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
+  .steps{
+    font-family:var(--mono);
+    font-size:clamp(10px,.72vw,12px);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--dim);
+    margin-top:clamp(30px,4vw,54px);
+  }
+  .steps b{color:var(--ink);font-weight:500}
+
+  .hero-art{position:relative}
+  .hero-art svg{display:block;width:100%;height:auto;overflow:visible}
+
+  .flow{stroke-dasharray:9 11;animation:flow 1.5s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-40}}
+  .pulse{animation:pulse 2.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+  /* ================= sections ================= */
+  section{padding:clamp(52px,7vw,96px) 0;border-top:1px solid var(--line);position:relative;z-index:2}
+  .intro{max-width:60ch;margin-bottom:38px}
+
+  .card{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:clamp(20px,2.4vw,32px);
+  }
+
+  /* ================= predict ================= */
+  .qblock{margin-bottom:30px}
+  .qblock h3{
+    font-family:var(--display);
+    text-transform:uppercase;
+    font-size:clamp(19px,1.7vw,25px);
+    letter-spacing:.01em;
+    font-weight:700;
+    margin:0 0 8px;
+  }
+  .choices{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .choice{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    padding:15px 18px;
+    background:var(--bone);
+    border:1.5px solid var(--line);
+    border-radius:2px;
+    cursor:pointer;
+    transition:border-color .15s,background .15s;
+  }
+  .choice:hover{border-color:var(--volt);background:var(--white)}
+  .choice input{margin-top:5px;accent-color:var(--volt);width:18px;height:18px;flex:none}
+  .choice.locked{cursor:default;opacity:.45}
+  .choice.locked.chosen{opacity:1;border-color:var(--volt);border-width:2px;background:var(--white)}
+
+  /* ================= observe ================= */
+  .gatemsg{
+    font-family:var(--mono);
+    font-size:.8em;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ember);
+    border:1.5px dashed var(--ember);
+    border-radius:2px;
+    padding:16px 20px;
+    margin-bottom:26px;
+    text-align:center;
+  }
+  .locked-panel{
+    filter:blur(6px);
+    opacity:.35;
+    pointer-events:none;
+    user-select:none;
+    transition:filter .55s,opacity .55s;
+  }
+  .locked-panel.open{filter:none;opacity:1;pointer-events:auto;user-select:auto}
+
+  .bench{display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:stretch}
+  .stage{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:10px;
+    position:relative;
+    overflow:hidden;
+  }
+  .stage svg{display:block;width:100%;height:auto;touch-action:none}
+  #magnet{cursor:grab}
+  .stage.dragging #magnet{cursor:grabbing}
+
+  .hint{
+    position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+    font-family:var(--mono);font-size:.7em;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--dim);background:rgba(255,255,255,.92);
+    padding:6px 14px;border:1px solid var(--line);border-radius:2px;
+    pointer-events:none;transition:opacity .3s;
+  }
+
+  .instrument{
+    background:var(--ink);
+    border-radius:3px;
+    padding:22px 20px 18px;
+    text-align:center;
+    color:var(--bone);
+  }
+  .readout-label{
+    font-family:var(--mono);font-size:.66em;letter-spacing:.22em;
+    text-transform:uppercase;color:#8B97B8;
+  }
+  .readout{
+    font-family:var(--mono);
+    font-size:clamp(28px,3.1vw,42px);
+    font-weight:600;line-height:1;margin-top:6px;color:var(--bone);
+  }
+  .readout .unit{font-size:.42em;color:#8B97B8;margin-left:7px;letter-spacing:.1em}
+  .sub-readout{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.16)}
+  .sub-readout .readout{font-size:clamp(19px,2vw,26px)}
+
+  .controls{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+
+  table{width:100%;border-collapse:collapse;margin-top:26px;font-size:.94em}
+  th,td{text-align:left;padding:14px 12px;border-bottom:1px solid var(--line)}
+  th{
+    font-family:var(--mono);font-size:.7em;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--dim);font-weight:500;
+  }
+  td.num{font-family:var(--mono);font-weight:600}
+  tr.pending td{color:var(--dim)}
+
+  .verdict{margin-top:28px;border-left:3px solid var(--volt)}
+
+  /* ================= explain ================= */
+  .reps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .rep{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:clamp(20px,2.2vw,28px);
+  }
+  .formula{
+    font-family:var(--mono);
+    font-size:clamp(22px,2.2vw,30px);
+    font-weight:600;
+    text-align:center;
+    padding:22px 0 16px;
+    color:var(--volt);
+  }
+  .legend{font-size:.9em;color:var(--dim);margin:0;line-height:1.9}
+  .legend b{color:var(--ink);font-family:var(--mono);font-weight:600}
+
+  .glossary{margin-top:22px}
+  .term{
+    display:grid;
+    grid-template-columns:200px 1fr 240px;
+    gap:20px;align-items:center;
+    padding:16px 0;border-bottom:1px solid var(--line);
+  }
+  .term:last-child{border-bottom:none}
+  .term strong{font-size:1.04em}
+  .term .gloss{color:var(--dim);font-size:.93em}
+  .term input,.answer-input{
+    font-family:var(--body);font-size:.95em;padding:11px 13px;
+    border:1.5px solid var(--line);border-radius:2px;
+    background:var(--bone);color:var(--ink);width:100%;
+  }
+
+  /* ================= check ================= */
+  .qcard{
+    background:var(--white);border:1px solid var(--line);
+    border-radius:3px;padding:clamp(20px,2.4vw,30px);margin-bottom:20px;
+  }
+  .marks{
+    font-family:var(--mono);font-size:.68em;letter-spacing:.16em;
+    color:var(--dim);float:right;text-transform:uppercase;
+  }
+  textarea{
+    width:100%;min-height:96px;font-family:var(--body);font-size:.98em;
+    line-height:1.55;padding:15px;border:1.5px solid var(--line);
+    border-radius:2px;background:var(--bone);color:var(--ink);resize:vertical;
+  }
+  .model{
+    margin-top:16px;padding:18px 20px;background:var(--bone);
+    border-left:3px solid var(--ember);border-radius:0 2px 2px 0;font-size:.95em;
+  }
+  .model[hidden]{display:none}
+  .feedback{margin-top:14px;font-family:var(--mono);font-size:.82em;line-height:1.7}
+  .ok{color:#0E7A4D}
+  .no{color:var(--ember)}
+
+  /* ================= footer ================= */
+  footer{
+    background:var(--ink);color:var(--bone);
+    padding:clamp(44px,5vw,66px) 0 clamp(34px,4vw,48px);
+    margin-top:20px;position:relative;z-index:2;
+  }
+  footer p{color:#A9B4CE;font-size:.9em;max-width:62ch}
+  .credit{
+    display:flex;flex-wrap:wrap;gap:18px;align-items:baseline;
+    justify-content:space-between;
+    margin-top:34px;padding-top:24px;
+    border-top:1px solid rgba(255,255,255,.16);
+  }
+  .credit .by{
+    font-family:var(--display);text-transform:uppercase;
+    font-size:clamp(20px,2.4vw,32px);font-weight:700;letter-spacing:.01em;
+  }
+  .credit .by em{font-style:normal;color:var(--aqua)}
+  .credit .note{
+    font-family:var(--mono);font-size:.7em;letter-spacing:.2em;
+    text-transform:uppercase;color:#8B97B8;
+  }
+
+  /* ================= responsive ================= */
+  @media (max-width:960px){
+    .hero-grid{grid-template-columns:1fr}
+    .hero-art{order:-1}
+    .sweep{top:-24vh;right:-52vw;width:150vw;height:120vh}
+    .bench{grid-template-columns:1fr}
+    .reps{grid-template-columns:1fr}
+    .term{grid-template-columns:1fr;gap:9px}
+    .navlinks{display:none}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .flow,.pulse{animation:none}
+    *{transition-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <div class="sweep"></div>
+
+  <div class="wrap">
+    <nav>
+      <div class="mark">
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+          <rect x="1"  y="4" width="6" height="22" rx="1.5" fill="#0B1B3A"/>
+          <rect x="9"  y="4" width="6" height="22" rx="1.5" fill="#F04E23"/>
+          <rect x="17" y="4" width="6" height="22" rx="1.5" fill="#1B45E8"/>
+          <rect x="25" y="4" width="4" height="22" rx="1.5" fill="#1FC7DE"/>
+        </svg>
+        <span>Induction Lab</span>
+      </div>
+      <div class="navlinks">
+        <a href="#predict">Predict</a>
+        <a href="#observe">Observe</a>
+        <a href="#explain">Explain</a>
+        <a href="#check">Check</a>
+      </div>
+    </nav>
+
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Grade 11 Physical Sciences &nbsp;/&nbsp; Electromagnetism</p>
+        <h1 class="display">Why does the torch<br><span class="accent">light</span> up?</h1>
+        <p class="lede" style="margin-top:26px">A hand crank torch has no battery inside it. You turn the handle and it makes light. Work out exactly what is happening in there.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#predict">Start the lesson &#8599;</a>
+          <a class="btn btn-ghost" href="#observe">Skip to the apparatus &#8594;</a>
+        </div>
+        <p class="steps"><b>Predict</b> &nbsp;/&nbsp; <b>Observe</b> &nbsp;/&nbsp; <b>Explain</b> &nbsp;/&nbsp; <b>Check</b></p>
+      </div>
+
+      <div class="hero-art">
+        <svg viewBox="0 0 620 420" role="img" aria-label="A magnetic field entering a coil of wire and leaving as electric current that lights a lamp">
+          <defs>
+            <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#FFFFFF" stop-opacity=".92"/>
+              <stop offset="55%"  stop-color="#DFE9FF" stop-opacity=".62"/>
+              <stop offset="100%" stop-color="#B9CCFF" stop-opacity=".42"/>
+            </linearGradient>
+            <linearGradient id="out" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#1B45E8"/>
+              <stop offset="100%" stop-color="#1FC7DE"/>
+            </linearGradient>
+            <radialGradient id="bulb">
+              <stop offset="0%"   stop-color="#FFF6D8"/>
+              <stop offset="55%"  stop-color="#FFD466" stop-opacity=".85"/>
+              <stop offset="100%" stop-color="#FFD466" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- raw field entering, the loose thread -->
+          <path d="M6 250 C58 250 42 196 84 196 C126 196 108 262 152 262 C186 262 176 212 214 208"
+                fill="none" stroke="#F04E23" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M214 208 C244 205 250 196 268 194"
+                fill="none" stroke="#F04E23" stroke-width="2.6" stroke-linecap="round"/>
+
+          <!-- the coil, drawn as stacked glass panes -->
+          <g>
+            <ellipse cx="268" cy="196" rx="26" ry="104" fill="url(#glass)" stroke="#FFFFFF" stroke-width="1.6"/>
+            <ellipse cx="300" cy="196" rx="26" ry="104" fill="url(#glass)" stroke="#FFFFFF" stroke-width="1.6"/>
+            <ellipse cx="332" cy="196" rx="26" ry="104" fill="url(#glass)" stroke="#FFFFFF" stroke-width="1.6"/>
+            <ellipse cx="364" cy="196" rx="26" ry="104" fill="url(#glass)" stroke="#FFFFFF" stroke-width="1.6"/>
+            <ellipse cx="396" cy="196" rx="26" ry="104" fill="url(#glass)" stroke="#FFFFFF" stroke-width="1.6"/>
+          </g>
+
+          <!-- ordered current leaving -->
+          <path d="M404 194 C452 194 452 168 496 168 C528 168 526 150 548 150"
+                fill="none" stroke="url(#out)" stroke-width="3.4" stroke-linecap="round"/>
+          <path class="flow" d="M404 206 C452 206 452 182 496 182 C528 182 526 164 548 164"
+                fill="none" stroke="#1FC7DE" stroke-width="2.4" stroke-linecap="round" opacity=".95"/>
+          <path class="flow" d="M404 182 C452 182 452 156 496 156 C528 156 526 138 548 138"
+                fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" opacity=".7"
+                style="animation-duration:1.9s"/>
+
+          <!-- the lamp -->
+          <circle class="pulse" cx="566" cy="150" r="46" fill="url(#bulb)"/>
+          <circle cx="566" cy="150" r="15" fill="#FFE9A8" stroke="#FFFFFF" stroke-width="2"/>
+
+          <!-- labels -->
+          <text x="8" y="298" font-family="ui-monospace,Menlo,monospace" font-size="11"
+                letter-spacing="2.6" fill="#F04E23">CHANGING FIELD</text>
+          <text x="252" y="330" font-family="ui-monospace,Menlo,monospace" font-size="11"
+                letter-spacing="2.6" fill="#0B1B3A">COIL</text>
+          <text x="470" y="232" font-family="ui-monospace,Menlo,monospace" font-size="11"
+                letter-spacing="2.6" fill="#FFFFFF">INDUCED EMF</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ==================== PREDICT ==================== -->
+<section id="predict">
+  <p class="eyebrow rule-eyebrow">Step one &nbsp;/&nbsp; Predict</p>
+  <h2 class="display">Commit before you touch it</h2>
+  <p class="intro">Write down what you think will happen <strong>before</strong> you use the apparatus. You are not marked on being right. You are marked on whether you can explain the gap between what you expected and what you saw.</p>
+
+  <div class="card">
+    <div class="qblock">
+      <h3>Prediction one</h3>
+      <p style="margin-bottom:0">You push a bar magnet <em>through</em> a coil of wire connected to a galvanometer. What does the needle do?</p>
+      <div class="choices" id="p1">
+        <label class="choice"><input type="radio" name="pred1" value="a"><span>Nothing. There is no battery in the circuit, so no current can flow.</span></label>
+        <label class="choice"><input type="radio" name="pred1" value="b"><span>It swings to one side and stays there while the magnet is inside.</span></label>
+        <label class="choice"><input type="radio" name="pred1" value="c"><span>It swings one way, then swings back the other way.</span></label>
+        <label class="choice"><input type="radio" name="pred1" value="d"><span>It swings further the longer the magnet stays in the coil.</span></label>
+      </div>
+    </div>
+
+    <div class="qblock" style="margin-bottom:0">
+      <h3>Prediction two</h3>
+      <p style="margin-bottom:0">Now the magnet rests <em>inside</em> the coil, completely still. The magnetic field inside the coil is strong. What does the needle read?</p>
+      <div class="choices" id="p2">
+        <label class="choice"><input type="radio" name="pred2" value="a"><span>A large reading, because the field inside the coil is strong.</span></label>
+        <label class="choice"><input type="radio" name="pred2" value="b"><span>A small reading, because some field still passes through the coil.</span></label>
+        <label class="choice"><input type="radio" name="pred2" value="c"><span>Zero, because nothing is changing.</span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="lockBtn" disabled>Lock in my predictions &#8599;</button>
+  </div>
+</section>
+
+<!-- ==================== OBSERVE ==================== -->
+<section id="observe">
+  <p class="eyebrow rule-eyebrow">Step two &nbsp;/&nbsp; Observe</p>
+  <h2 class="display">Now test it</h2>
+
+  <div class="gatemsg" id="gate">Answer both predictions above to unlock the apparatus</div>
+
+  <div class="locked-panel" id="lab">
+    <p class="intro">Drag the magnet through the coil with your finger or your mouse. Move it slowly, then quickly. The meter reads the induced EMF as it happens.</p>
+
+    <div class="bench">
+      <div class="stage" id="stage">
+        <svg id="scene" viewBox="0 0 660 300" role="img" aria-label="A bar magnet that can be dragged through a coil of wire connected to a galvanometer">
+          <g id="field" opacity="0.3"></g>
+
+          <path d="M250 150 L250 262 L300 262" fill="none" stroke="#0B1B3A" stroke-width="2.5"/>
+          <path d="M410 150 L410 262 L360 262" fill="none" stroke="#0B1B3A" stroke-width="2.5"/>
+          <rect x="300" y="252" width="60" height="20" rx="2" fill="#0B1B3A"/>
+          <text x="330" y="266" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#F7F3EC" letter-spacing="1.4">METER</text>
+
+          <g id="coil" fill="none" stroke="#B98A3C" stroke-width="7" stroke-linecap="round">
+            <ellipse cx="260" cy="150" rx="15" ry="52"/>
+            <ellipse cx="285" cy="150" rx="15" ry="52"/>
+            <ellipse cx="310" cy="150" rx="15" ry="52"/>
+            <ellipse cx="335" cy="150" rx="15" ry="52"/>
+            <ellipse cx="360" cy="150" rx="15" ry="52"/>
+            <ellipse cx="385" cy="150" rx="15" ry="52"/>
+          </g>
+
+          <g id="magnet">
+            <rect x="-58" y="128" width="58" height="44" rx="2" fill="#1B45E8"/>
+            <rect x="0"   y="128" width="58" height="44" rx="2" fill="#F04E23"/>
+            <text x="-29" y="157" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="19" font-weight="700" fill="#fff">S</text>
+            <text x="29"  y="157" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="19" font-weight="700" fill="#fff">N</text>
+          </g>
+        </svg>
+        <div class="hint" id="hint">Drag the magnet</div>
+      </div>
+
+      <div class="instrument">
+        <svg viewBox="0 0 240 150" role="img" aria-label="Centre zero galvanometer showing induced EMF">
+          <path d="M30 130 A90 90 0 0 1 210 130" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="2"/>
+          <g id="ticks" stroke="rgba(255,255,255,.45)" stroke-width="1.5"></g>
+          <text x="44"  y="126" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8B97B8">&#8722;</text>
+          <text x="120" y="44" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8B97B8">0</text>
+          <text x="190" y="126" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8B97B8">+</text>
+          <line id="needle" x1="120" y1="130" x2="120" y2="52" stroke="#F04E23" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="120" cy="130" r="7" fill="#F7F3EC"/>
+        </svg>
+        <div class="readout-label">Induced EMF</div>
+        <div class="readout"><span id="emfVal">0,00</span><span class="unit">V</span></div>
+        <div class="sub-readout">
+          <div class="readout-label">Flux through coil</div>
+          <div class="readout"><span id="fluxVal">0,00</span><span class="unit">mWb</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" data-trial="slow">Push through slowly</button>
+      <button class="btn" data-trial="fast">Push through quickly</button>
+      <button class="btn" data-trial="still">Hold still inside coil</button>
+      <button class="btn btn-ghost" id="resetBtn">Reset apparatus</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Trial</th><th>What you did</th><th>Largest EMF</th><th>Needle behaviour</th></tr>
+      </thead>
+      <tbody id="log">
+        <tr class="pending" data-row="slow"><td class="num">1</td><td>Magnet pushed through slowly</td><td class="num">not run</td><td>not run</td></tr>
+        <tr class="pending" data-row="fast"><td class="num">2</td><td>Magnet pushed through quickly</td><td class="num">not run</td><td>not run</td></tr>
+        <tr class="pending" data-row="still"><td class="num">3</td><td>Magnet held still inside coil</td><td class="num">not run</td><td>not run</td></tr>
+      </tbody>
+    </table>
+
+    <div class="card verdict" id="verdict" style="display:none">
+      <h3 style="font-family:var(--display);text-transform:uppercase;font-size:clamp(20px,1.9vw,27px);margin:0 0 14px">Your predictions against what happened</h3>
+      <div id="verdictBody"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== EXPLAIN ==================== -->
+<section id="explain">
+  <p class="eyebrow rule-eyebrow">Step three &nbsp;/&nbsp; Explain</p>
+  <h2 class="display">One law, three ways</h2>
+  <p class="intro">Every panel below says exactly the same thing. If one of them is hard to follow, start with a different one and come back to it.</p>
+
+  <div class="reps">
+    <div class="rep">
+      <p class="eyebrow">In words</p>
+      <p style="margin-bottom:0">The EMF induced in a coil is directly proportional to the <strong>rate of change</strong> of the magnetic flux linkage. A field sitting still induces nothing. Only a <strong>changing</strong> field induces an EMF.</p>
+    </div>
+    <div class="rep">
+      <p class="eyebrow">In symbols</p>
+      <div class="formula">&#949; = &#8722;N &#916;&#934; / &#916;t</div>
+      <p class="legend">
+        <b>&#949;</b> induced EMF, in volts<br>
+        <b>N</b> number of turns on the coil<br>
+        <b>&#916;&#934;</b> change in flux, in weber<br>
+        <b>&#916;t</b> time taken, in seconds<br>
+        <b>&#8722;</b> the induced current opposes the change
+      </p>
+    </div>
+    <div class="rep">
+      <p class="eyebrow">In a picture</p>
+      <svg viewBox="0 0 240 150" style="width:100%;height:auto" role="img" aria-label="Graph of induced EMF against time showing a swing above zero then below zero">
+        <line x1="20" y1="75" x2="225" y2="75" stroke="#DED7C8" stroke-width="1.5"/>
+        <line x1="30" y1="18" x2="30" y2="135" stroke="#DED7C8" stroke-width="1.5"/>
+        <path d="M30 75 Q68 8 105 75 Q142 142 180 75 L225 75" fill="none" stroke="#1B45E8" stroke-width="2.8"/>
+        <text x="232" y="79" font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#6E7891">t</text>
+        <text x="17"  y="16" font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#6E7891">&#949;</text>
+        <text x="105" y="95" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="9" fill="#6E7891">centre</text>
+      </svg>
+      <p class="legend" style="margin-top:8px;line-height:1.6">Going in, the flux grows and the EMF is positive. At the centre the flux stops growing for an instant and the EMF passes through zero. Coming out, the flux shrinks and the EMF reverses.</p>
+    </div>
+  </div>
+
+  <div class="card glossary">
+    <p class="eyebrow">Key words for this lesson</p>
+    <p style="font-size:.95em;color:var(--dim);max-width:60ch">Write each word in the language you think in. You will remember it better than the English on its own.</p>
+
+    <div class="term">
+      <strong>Magnetic flux</strong>
+      <span class="gloss">How much magnetic field passes through the coil. Symbol &#934;, unit weber.</span>
+      <input type="text" placeholder="In my language" aria-label="Magnetic flux in my language">
+    </div>
+    <div class="term">
+      <strong>Induction</strong>
+      <span class="gloss">Making a current appear in a wire without touching it, using a changing field.</span>
+      <input type="text" placeholder="In my language" aria-label="Induction in my language">
+    </div>
+    <div class="term">
+      <strong>Electromotive force</strong>
+      <span class="gloss">The push that drives the induced current. Symbol &#949;, unit volt.</span>
+      <input type="text" placeholder="In my language" aria-label="Electromotive force in my language">
+    </div>
+    <div class="term">
+      <strong>Rate of change</strong>
+      <span class="gloss">How fast something is changing, not how big it is. This is the whole lesson.</span>
+      <input type="text" placeholder="In my language" aria-label="Rate of change in my language">
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CHECK ==================== -->
+<section id="check">
+  <p class="eyebrow rule-eyebrow">Step four &nbsp;/&nbsp; Check</p>
+  <h2 class="display">Three questions, examination style</h2>
+
+  <div class="qcard">
+    <span class="marks">2 marks</span>
+    <h3 style="font-family:var(--display);text-transform:uppercase;font-size:clamp(19px,1.7vw,24px);margin:0 0 10px">Question one</h3>
+    <p>State Faraday's Law of electromagnetic induction in words.</p>
+    <textarea id="q1" placeholder="Write your answer here"></textarea>
+    <div class="controls"><button class="btn" data-show="m1">Show the marking answer</button></div>
+    <div class="model" id="m1" hidden>
+      The EMF induced in a circuit is directly proportional to the rate of change of the magnetic flux linkage with the circuit.
+      <br><br><em>Marker note. The words <strong>rate of change</strong> carry the mark. An answer saying the EMF depends on the magnetic flux, without saying rate of change, does not earn it.</em>
+    </div>
+  </div>
+
+  <div class="qcard">
+    <span class="marks">3 marks</span>
+    <h3 style="font-family:var(--display);text-transform:uppercase;font-size:clamp(19px,1.7vw,24px);margin:0 0 10px">Question two</h3>
+    <p>The north pole of a bar magnet is pushed towards a coil. The face of the coil closest to the magnet becomes which pole, and why?</p>
+    <div class="choices" id="q2">
+      <label class="choice"><input type="radio" name="q2" value="a"><span>A south pole, because opposite poles attract and the coil pulls the magnet in.</span></label>
+      <label class="choice"><input type="radio" name="q2" value="b"><span>A north pole, because the induced current opposes the approaching magnet.</span></label>
+      <label class="choice"><input type="radio" name="q2" value="c"><span>Neither, because a coil cannot have magnetic poles.</span></label>
+    </div>
+    <div class="feedback" id="f2"></div>
+  </div>
+
+  <div class="qcard">
+    <span class="marks">4 marks</span>
+    <h3 style="font-family:var(--display);text-transform:uppercase;font-size:clamp(19px,1.7vw,24px);margin:0 0 10px">Question three</h3>
+    <p>A coil of <strong>250 turns</strong> experiences a change in magnetic flux of <strong>3,6 &#215; 10<sup>&#8722;3</sup> Wb</strong> in <strong>0,15 s</strong>. Calculate the magnitude of the induced EMF.</p>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px">
+      <input type="text" id="q3" class="answer-input" placeholder="Answer in volts" style="width:190px;font-family:var(--mono)">
+      <button class="btn" id="q3check">Check my answer</button>
+    </div>
+    <div class="feedback" id="f3"></div>
+    <div class="model" id="m3" hidden>
+      &#949; = N &#916;&#934; / &#916;t<br>
+      &#949; = 250 &#215; (3,6 &#215; 10<sup>&#8722;3</sup>) / 0,15<br>
+      &#949; = 250 &#215; 0,024<br>
+      &#949; = <strong>6,0 V</strong>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ==================== FOOTER ==================== -->
+<footer>
+  <div class="wrap">
+    <p class="eyebrow" style="color:#8B97B8">Induction Lab</p>
+    <p>Built for the electromagnetism section of the Grade 11 CAPS Physical Sciences curriculum. Runs without an internet connection once the page has loaded. Nothing you type is sent anywhere or kept after you close the page.</p>
+    <div class="credit">
+      <div class="by">Designed by <em>Witness</em></div>
+      <div class="note">Predict &nbsp;/&nbsp; Observe &nbsp;/&nbsp; Explain &nbsp;/&nbsp; Check</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- physics model ----------------
+     Flux through the coil is modelled as a smooth peak centred on the coil.
+     Phi(x) = PHI_MAX * exp(-(x/a)^2)
+     EMF is found by numerically differentiating flux with respect to time,
+     so a stationary magnet gives exactly zero. That is the point of the lesson.
+  ------------------------------------------------- */
+
+  var COIL_X  = 322, A_WIDTH = 78, PHI_MAX = 4.0;
+  var TURNS   = 250, GAIN = 0.62;
+  var X_MIN   = 60, X_MAX = 600;
+
+  var magnetX = 90, prevPhi = null, prevT = null;
+  var emf = 0, emfShown = 0;
+  var dragging = false, autoRun = null;
+  var peakAbs = 0, sawFlip = false, lastSign = 0;
+
+  var scene   = document.getElementById('scene');
+  var stage   = document.getElementById('stage');
+  var magnet  = document.getElementById('magnet');
+  var needle  = document.getElementById('needle');
+  var emfVal  = document.getElementById('emfVal');
+  var fluxVal = document.getElementById('fluxVal');
+  var hint    = document.getElementById('hint');
+  var field   = document.getElementById('field');
+
+  function flux(x){ var d = (x - COIL_X) / A_WIDTH; return PHI_MAX * Math.exp(-d * d); }
+  function fmt(v){ return v.toFixed(2).replace('.', ','); }
+
+  /* galvanometer ticks */
+  (function(){
+    var g = document.getElementById('ticks');
+    for (var i = 0; i <= 10; i++){
+      var ang = (-70 + i * 14) * Math.PI / 180;
+      var ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1', 120 + Math.sin(ang) * 78);
+      ln.setAttribute('y1', 130 - Math.cos(ang) * 78);
+      ln.setAttribute('x2', 120 + Math.sin(ang) * 86);
+      ln.setAttribute('y2', 130 - Math.cos(ang) * 86);
+      g.appendChild(ln);
+    }
+  })();
+
+  /* field lines travel with the magnet */
+  (function(){
+    var loops = [[34,26],[52,42],[72,60]];
+    for (var i = 0; i < loops.length; i++){
+      var e = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+      e.setAttribute('rx', loops[i][0] + 30);
+      e.setAttribute('ry', loops[i][1]);
+      e.setAttribute('cy', 150);
+      e.setAttribute('fill','none');
+      e.setAttribute('stroke','#1B45E8');
+      e.setAttribute('stroke-width','1.5');
+      e.setAttribute('stroke-dasharray','5 5');
+      field.appendChild(e);
+    }
+  })();
+
+  function draw(){
+    magnet.setAttribute('transform','translate(' + magnetX + ',0)');
+    var lines = field.childNodes;
+    for (var i = 0; i < lines.length; i++) lines[i].setAttribute('cx', magnetX);
+
+    emfShown += (emf - emfShown) * 0.28;
+    var clamped = Math.max(-8, Math.min(8, emfShown));
+    var rad = clamped / 8 * 70 * Math.PI / 180;
+    needle.setAttribute('x2', 120 + Math.sin(rad) * 78);
+    needle.setAttribute('y2', 130 - Math.cos(rad) * 78);
+
+    emfVal.textContent  = fmt(Math.abs(emfShown) < 0.02 ? 0 : emfShown);
+    fluxVal.textContent = fmt(flux(magnetX));
+  }
+
+  function tick(now){
+    if (autoRun) autoRun(now);
+
+    var phi = flux(magnetX);
+    if (prevPhi !== null && prevT !== null){
+      var dt = (now - prevT) / 1000;
+      if (dt > 0.0005){
+        var raw = -TURNS * (phi - prevPhi) / dt * GAIN / 1000;
+        emf = emf * 0.45 + raw * 0.55;
+        if (Math.abs(emf) < 0.02) emf = 0;
+        prevPhi = phi; prevT = now;
+      }
+    } else { prevPhi = phi; prevT = now; }
+
+    if (!dragging && !autoRun) emf *= 0.88;
+
+    var a = Math.abs(emf);
+    if (a > peakAbs) peakAbs = a;
+    if (a > 0.4){
+      var s = emf > 0 ? 1 : -1;
+      if (lastSign !== 0 && s !== lastSign) sawFlip = true;
+      lastSign = s;
+    }
+
+    draw();
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  /* ---------------- dragging ---------------- */
+  function svgX(evt){
+    var r = scene.getBoundingClientRect();
+    var cx = evt.touches ? evt.touches[0].clientX : evt.clientX;
+    return (cx - r.left) / r.width * 660;
+  }
+  function startDrag(e){
+    if (autoRun) return;
+    dragging = true; stage.classList.add('dragging');
+    hint.style.opacity = '0'; e.preventDefault();
+  }
+  function moveDrag(e){
+    if (!dragging) return;
+    magnetX = Math.max(X_MIN, Math.min(X_MAX, svgX(e)));
+    e.preventDefault();
+  }
+  function endDrag(){ dragging = false; stage.classList.remove('dragging'); }
+
+  magnet.addEventListener('mousedown', startDrag);
+  magnet.addEventListener('touchstart', startDrag, {passive:false});
+  window.addEventListener('mousemove', moveDrag);
+  window.addEventListener('touchmove', moveDrag, {passive:false});
+  window.addEventListener('mouseup', endDrag);
+  window.addEventListener('touchend', endDrag);
+
+  /* ---------------- scripted trials ---------------- */
+  var trialButtons = document.querySelectorAll('[data-trial]');
+  function setButtons(on){
+    for (var i = 0; i < trialButtons.length; i++) trialButtons[i].disabled = !on;
+  }
+  function logRow(kind, peak, behaviour){
+    var row = document.querySelector('[data-row="' + kind + '"]');
+    row.classList.remove('pending');
+    row.cells[2].textContent = fmt(peak) + ' V';
+    row.cells[3].textContent = behaviour;
+    checkAllTrials();
+  }
+  function runTrial(kind){
+    if (autoRun) return;
+    hint.style.opacity = '0';
+    peakAbs = 0; sawFlip = false; lastSign = 0;
+    setButtons(false);
+
+    var t0 = null;
+    var duration = kind === 'slow' ? 4200 : (kind === 'fast' ? 900 : 3600);
+    magnetX = kind === 'still' ? 90 : X_MIN + 20;
+
+    autoRun = function(now){
+      if (t0 === null) t0 = now;
+      var p = (now - t0) / duration;
+
+      if (kind === 'still'){
+        if (p < 0.35) magnetX = 90 + (COIL_X - 90) * (p / 0.35);
+        else magnetX = COIL_X;
+      } else {
+        magnetX = (X_MIN + 20) + ((X_MAX - 20) - (X_MIN + 20)) * p;
+      }
+
+      if (p >= 1){
+        autoRun = null; setButtons(true);
+        if (kind === 'still') logRow('still', 0, 'Did not move at all');
+        else logRow(kind, peakAbs, sawFlip ? 'Swung one way, then back the other way' : 'Swung to one side');
+      }
+    };
+  }
+  for (var i = 0; i < trialButtons.length; i++){
+    trialButtons[i].addEventListener('click', function(){
+      runTrial(this.getAttribute('data-trial'));
+    });
+  }
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if (autoRun) return;
+    magnetX = 90; emf = 0; emfShown = 0; hint.style.opacity = '1';
+  });
+
+  /* ---------------- prediction gate ---------------- */
+  var pred1 = null, pred2 = null;
+  var lockBtn = document.getElementById('lockBtn');
+
+  function watch(name, cb){
+    var els = document.querySelectorAll('input[name="' + name + '"]');
+    for (var i = 0; i < els.length; i++){
+      els[i].addEventListener('change', function(){ cb(this.value); });
+    }
+  }
+  watch('pred1', function(v){ pred1 = v; lockBtn.disabled = !(pred1 && pred2); });
+  watch('pred2', function(v){ pred2 = v; lockBtn.disabled = !(pred1 && pred2); });
+
+  lockBtn.addEventListener('click', function(){
+    document.getElementById('lab').classList.add('open');
+    document.getElementById('gate').style.display = 'none';
+    lockBtn.disabled = true;
+    lockBtn.textContent = 'Predictions locked';
+
+    var all = document.querySelectorAll('#p1 .choice, #p2 .choice');
+    for (var i = 0; i < all.length; i++){
+      var input = all[i].querySelector('input');
+      input.disabled = true;
+      all[i].classList.add('locked');
+      if (input.checked) all[i].classList.add('chosen');
+    }
+    document.getElementById('observe').scrollIntoView({block:'start'});
+  });
+
+  /* ---------------- verdict ---------------- */
+  function checkAllTrials(){
+    if (document.querySelectorAll('#log tr.pending').length > 0) return;
+
+    var body = document.getElementById('verdictBody');
+    var html = '';
+
+    html += '<p><strong>Prediction one.</strong> ';
+    html += pred1 === 'c'
+      ? 'You said the needle swings one way then back the other way, and that is what happened. Going in, the flux through the coil grows. Coming out, it shrinks. Those are opposite changes, so the induced EMF reverses.'
+      : 'You expected something different. The needle swung one way and then back the other way. Going in, the flux through the coil grows. Coming out, it shrinks. Those are opposite changes, so the EMF reverses direction.';
+    html += '</p>';
+
+    html += '<p><strong>Prediction two.</strong> ';
+    html += pred2 === 'c'
+      ? 'You said the reading would be zero, and it was. This is the heart of the lesson. The flux inside the coil was at its largest during that trial, yet the reading was zero, because the flux was not changing.'
+      : 'The reading was zero. Look at the flux display during that trial. The flux was at its <em>largest</em> value, and the EMF was still zero. A strong field is not what induces an EMF. Only a <strong>changing</strong> field does.';
+    html += '</p>';
+
+    html += '<p style="margin-bottom:0"><strong>Compare trials one and two.</strong> The magnet travelled the same distance both times, so the change in flux was the same. Only the time was different. The quick push gave the larger EMF because &#916;t was smaller. That is what the &#916;t underneath &#916;&#934; in the formula is telling you.</p>';
+
+    body.innerHTML = html;
+    document.getElementById('verdict').style.display = 'block';
+  }
+
+  /* ---------------- check questions ---------------- */
+  var showButtons = document.querySelectorAll('[data-show]');
+  for (var k = 0; k < showButtons.length; k++){
+    showButtons[k].addEventListener('click', function(){
+      var t = document.getElementById(this.getAttribute('data-show'));
+      t.hidden = !t.hidden;
+      this.textContent = t.hidden ? 'Show the marking answer' : 'Hide the marking answer';
+    });
+  }
+
+  watch('q2', function(v){
+    var f = document.getElementById('f2');
+    if (v === 'b'){
+      f.className = 'feedback ok';
+      f.textContent = 'Correct. The induced current always opposes the change that produced it, so the coil presents a north pole to push back against the approaching north pole.';
+    } else if (v === 'a'){
+      f.className = 'feedback no';
+      f.textContent = 'Not quite. If the coil attracted the magnet, the magnet would speed up on its own and the circuit would create energy from nothing. The induced effect always opposes the change.';
+    } else {
+      f.className = 'feedback no';
+      f.textContent = 'Not quite. A coil carrying a current behaves exactly like a bar magnet, with a north face and a south face.';
+    }
+  });
+
+  document.getElementById('q3check').addEventListener('click', function(){
+    var raw = document.getElementById('q3').value.replace(',', '.').replace(/[^0-9.\-]/g,'');
+    var val = parseFloat(raw);
+    var f = document.getElementById('f3');
+    if (isNaN(val)){
+      f.className = 'feedback no'; f.textContent = 'Type a number first.'; return;
+    }
+    if (Math.abs(val - 6) < 0.05){
+      f.className = 'feedback ok'; f.textContent = 'Correct. 6,0 V.';
+    } else if (Math.abs(val - 0.024) < 0.001){
+      f.className = 'feedback no';
+      f.textContent = 'Close. You found the rate of change of flux but did not multiply by the 250 turns.';
+    } else if (Math.abs(val - 1500) < 5 || Math.abs(val - 0.0006) < 0.0001){
+      f.className = 'feedback no';
+      f.textContent = 'Check your powers of ten. Write the flux as 0,0036 Wb and try again.';
+    } else {
+      f.className = 'feedback no';
+      f.textContent = 'Not correct. Work out the change in flux divided by the time first, then multiply by N.';
+    }
+    document.getElementById('m3').hidden = false;
+  });
+
+})();
+</script>
+</body>
+</html>
