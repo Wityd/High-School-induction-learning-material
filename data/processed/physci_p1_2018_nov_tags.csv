@@ -1,0 +1,65 @@
+paper_id,q_id,question,marks,topic,topic_source
+physci_p1_2018_nov_gr11,1.1,1,2.0,Vectors,keywords
+physci_p1_2018_nov_gr11,1.2,1,2.0,Newton's laws,keywords
+physci_p1_2018_nov_gr11,1.3,1,2.0,Newton's laws,keywords
+physci_p1_2018_nov_gr11,1.4,1,2.0,Newton's laws,teacher
+physci_p1_2018_nov_gr11,1.5,1,2.0,Waves and optics,teacher
+physci_p1_2018_nov_gr11,1.6,1,2.0,Waves and optics,teacher
+physci_p1_2018_nov_gr11,1.7,1,2.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,1.8,1,2.0,Electrostatics,teacher
+physci_p1_2018_nov_gr11,1.9,1,2.0,Electromagnetism,teacher
+physci_p1_2018_nov_gr11,1.10,1,2.0,Electric circuits,keywords
+physci_p1_2018_nov_gr11,2.1,2,1.0,Vectors,keywords
+physci_p1_2018_nov_gr11,2.2,2,,Vectors,keywords
+physci_p1_2018_nov_gr11,2.2.1,2,2.0,Vectors,keywords
+physci_p1_2018_nov_gr11,2.2.2,2,5.0,Vectors,keywords
+physci_p1_2018_nov_gr11,2.2.3,2,2.0,Vectors,keywords
+physci_p1_2018_nov_gr11,3.1,3,2.0,Newton's laws,keywords
+physci_p1_2018_nov_gr11,3.2,3,2.0,Newton's laws,keywords
+physci_p1_2018_nov_gr11,3.3,3,2.0,Newton's laws,keywords
+physci_p1_2018_nov_gr11,3.4,3,4.0,Newton's laws,keywords
+physci_p1_2018_nov_gr11,3.5,3,4.0,Newton's laws,keywords
+physci_p1_2018_nov_gr11,3.6,3,2.0,Newton's laws,keywords
+physci_p1_2018_nov_gr11,4.1,4,2.0,Newton's laws,teacher
+physci_p1_2018_nov_gr11,4.2,4,3.0,Newton's laws,teacher
+physci_p1_2018_nov_gr11,4.3,4,2.0,Newton's laws,teacher
+physci_p1_2018_nov_gr11,4.4,4,2.0,Newton's laws,teacher
+physci_p1_2018_nov_gr11,5.1,5,3.0,Newton's laws,teacher
+physci_p1_2018_nov_gr11,5.2,5,4.0,Newton's laws,teacher
+physci_p1_2018_nov_gr11,5.3,5,1.0,Newton's laws,teacher
+physci_p1_2018_nov_gr11,5.4,5,4.0,Newton's laws,teacher
+physci_p1_2018_nov_gr11,6.1,6,2.0,Gravitation,keywords
+physci_p1_2018_nov_gr11,6.2,6,4.0,Gravitation,keywords
+physci_p1_2018_nov_gr11,6.3,6,2.0,Gravitation,keywords
+physci_p1_2018_nov_gr11,7.1,7,1.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,7.2,7,4.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,7.3,7,3.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,7.4,7,5.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,7.5,7,3.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,7.6,7,1.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,8.1,8,2.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,8.2,8,2.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,8.3,8,2.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,8.4,8,1.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,8.5,8,2.0,Waves and optics,keywords
+physci_p1_2018_nov_gr11,9.1,9,2.0,Electrostatics,keywords
+physci_p1_2018_nov_gr11,9.2,9,4.0,Electrostatics,keywords
+physci_p1_2018_nov_gr11,9.3,9,4.0,Electrostatics,keywords
+physci_p1_2018_nov_gr11,9.4,9,3.0,Electrostatics,keywords
+physci_p1_2018_nov_gr11,10.1,10,2.0,Electrostatics,keywords
+physci_p1_2018_nov_gr11,10.2,10,,Electrostatics,keywords
+physci_p1_2018_nov_gr11,10.2.1,10,1.0,Electrostatics,keywords
+physci_p1_2018_nov_gr11,10.2.2,10,4.0,Electrostatics,keywords
+physci_p1_2018_nov_gr11,10.2.3,10,2.0,Electrostatics,keywords
+physci_p1_2018_nov_gr11,11.1,11,2.0,Electromagnetism,keywords
+physci_p1_2018_nov_gr11,11.2,11,3.0,Electromagnetism,keywords
+physci_p1_2018_nov_gr11,11.3,11,4.0,Electromagnetism,keywords
+physci_p1_2018_nov_gr11,11.4,11,1.0,Electromagnetism,keywords
+physci_p1_2018_nov_gr11,11.5,11,1.0,Electromagnetism,keywords
+physci_p1_2018_nov_gr11,11.6,11,1.0,Electromagnetism,keywords
+physci_p1_2018_nov_gr11,11.7,11,1.0,Electromagnetism,keywords
+physci_p1_2018_nov_gr11,12.1,12,3.0,Electric circuits,keywords
+physci_p1_2018_nov_gr11,12.2,12,5.0,Electric circuits,keywords
+physci_p1_2018_nov_gr11,12.3,12,3.0,Electric circuits,keywords
+physci_p1_2018_nov_gr11,12.4,12,1.0,Electric circuits,keywords
+physci_p1_2018_nov_gr11,12.5,12,2.0,Electric circuits,keywords
