@@ -1,0 +1,420 @@
+From 6f81beb18bd1fa71cd07c19f39894814cd14cfb9 Mon Sep 17 00:00:00 2001
+From: Wityd <129582633+Wityd@users.noreply.github.com>
+Date: Thu, 5 Nov 2026 14:17:42 +0000
+Subject: [PATCH] Tag first paper, improve tagger, link Question 11 to
+ misconceptions
+
+- Tagger: multi-word keywords match across line breaks; drop 'power' and
+  'weight'; add lift, slope, crate, free-body diagram, optical density
+- Teacher-corrected items from Nov 2018 Paper 1 kept as regression tests
+- Catalogue v0.2.0: EMI-12 (angle vs normal), EMI-13 (cm2 to m2),
+  EMI-14 (solenoid right-hand rule), marked draft
+- misconceptions/paper_links.csv: Question 11 and item 1.9 mapped to ids,
+  with a loader that checks every id exists
+- README progress updated
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01EcHD3aSmx8Gbx6Z6UPu6z8
+---
+ README.md                                     |   7 +-
+ misconceptions/electromagnetic_induction.json | 197 ++++++++++++++++--
+ misconceptions/paper_links.csv                |   9 +
+ pipeline/misconceptions.py                    |  15 ++
+ pipeline/topics.py                            |  23 +-
+ tests/test_pipeline.py                        |  40 ++++
+ 6 files changed, 261 insertions(+), 30 deletions(-)
+ create mode 100644 misconceptions/paper_links.csv
+
+diff --git a/README.md b/README.md
+index 271ed4b..4f87be4 100644
+--- a/README.md
++++ b/README.md
+@@ -52,9 +52,12 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
+ 
+ - [x] Past-paper extraction verified on one paper (Physical Sciences P1, November 2018): 150 marks, every question total matches the printed total
+ - [x] Mark verification and topic tagging moved from the notebook into tested code in [`pipeline/`](pipeline/)
+-- [x] First misconception catalogue: 11 electromagnetic induction misconceptions, with every wrong option in the lesson mapped to one ([`misconceptions/electromagnetic_induction.json`](misconceptions/electromagnetic_induction.json))
++- [x] First misconception catalogue: 14 electromagnetic induction misconceptions, with every wrong option in the lesson mapped to one ([`misconceptions/electromagnetic_induction.json`](misconceptions/electromagnetic_induction.json))
+ - [x] Numeric fingerprints: a wrong answer to the EMF calculation (e.g. 0,024 V or 0,135 V) is traced to the step that went wrong
+-- [ ] Teacher-checked topic tags for the first paper
++- [x] First paper fully tagged and teacher-checked: 150 of 150 marks (Newton's laws 43, Waves and optics 32, Electrostatics 24, Electric circuits 16, Electromagnetism 15, Vectors 12, Gravitation 8)
++- [x] Tagger improved from the teacher check (line-break matching, fewer misleading keywords), with the corrected items kept as tests
++- [x] Past-paper questions linked to misconceptions: Question 11 (13 marks, electromagnetism) mapped item by item in [`misconceptions/paper_links.csv`](misconceptions/paper_links.csv) (draft, pending memo check)
++- [ ] Confirm the Question 11 links and answers against the memorandum
+ - [ ] More papers, especially ones with electromagnetism questions
+ - [ ] Literature references for each misconception
+ 
+diff --git a/misconceptions/electromagnetic_induction.json b/misconceptions/electromagnetic_induction.json
+index 4ee0328..4e2fe83 100644
+--- a/misconceptions/electromagnetic_induction.json
++++ b/misconceptions/electromagnetic_induction.json
+@@ -3,7 +3,7 @@
+   "subtopic": "Electromagnetic induction (Faraday's Law and Lenz's Law)",
+   "grade": 11,
+   "curriculum": "CAPS Physical Sciences",
+-  "version": "0.1.0",
++  "version": "0.2.0",
+   "notes": "Drafted from the wrong options in Induction Lab v1. Add literature references and classroom evidence to each entry before using this for research claims.",
+   "misconceptions": [
+     {
+@@ -116,36 +116,183 @@
+       "why_learners_think_this": "They copy the sign from the formula without knowing what it means.",
+       "remediation": "Link the minus sign to the Lenz's Law question so it carries meaning.",
+       "references": []
++    },
++    {
++      "id": "EMI-12",
++      "type": "procedural",
++      "label": "Angle measured from the wrong line",
++      "learner_says": "In Φ = BA cos θ, θ is the angle between the field and the plane of the coil.",
++      "correct_idea": "θ is the angle between the magnetic field and the normal to the coil's surface. A field perpendicular to the coil gives θ = 0° and the largest flux.",
++      "why_learners_think_this": "The angle shown on a sketch is often the one with the coil itself, and learners use it without checking.",
++      "remediation": "Ask the learner to draw the normal on the sketch before substituting, and check: field along the normal means maximum flux.",
++      "references": [],
++      "status": "draft: confirm against the full question and memo"
++    },
++    {
++      "id": "EMI-13",
++      "type": "procedural",
++      "label": "Area not converted to square metres",
++      "learner_says": "The area is 20 cm², so A = 20 in the formula. (or 20 cm² = 0,2 m²)",
++      "correct_idea": "1 m² = 10⁴ cm², so 20 cm² = 2 × 10⁻³ m². Area converts with the square of the length factor.",
++      "why_learners_think_this": "Converting an area like a length (÷100 instead of ÷10 000), or not converting at all.",
++      "remediation": "Draw 1 m² as a 100 cm × 100 cm square to show why the factor is 10 000.",
++      "references": [],
++      "status": "draft: confirm against the full question and memo"
++    },
++    {
++      "id": "EMI-14",
++      "type": "procedural",
++      "label": "Right-hand rule misapplied to a solenoid",
++      "learner_says": "Picks the current direction from the induced pole using the wrong hand or with fingers and thumb swapped.",
++      "correct_idea": "For a solenoid, curl the fingers of the right hand in the direction of the current. The thumb points to the north pole.",
++      "why_learners_think_this": "Several hand rules are taught in Grade 10 and 11, and learners mix them up.",
++      "remediation": "After using Lenz's Law to find the induced pole, apply the solenoid rule as a separate, named second step.",
++      "references": [],
++      "status": "draft: confirm against the full question and memo"
+     }
+   ],
+   "item_map": [
+-    { "item_id": "lesson.predict1", "option": "A", "text": "Nothing. There is no battery in the circuit, so no current can flow.", "correct": false, "misconceptions": ["EMI-01"] },
+-    { "item_id": "lesson.predict1", "option": "B", "text": "It swings to one side and stays there while the magnet is inside.", "correct": false, "misconceptions": ["EMI-02", "EMI-07"] },
+-    { "item_id": "lesson.predict1", "option": "C", "text": "It swings one way, then swings back the other way.", "correct": true, "misconceptions": [] },
+-    { "item_id": "lesson.predict1", "option": "D", "text": "It swings further the longer the magnet stays in the coil.", "correct": false, "misconceptions": ["EMI-03"] },
+-
+-    { "item_id": "lesson.predict2", "option": "A", "text": "A large reading, because the field inside the coil is strong.", "correct": false, "misconceptions": ["EMI-02"] },
+-    { "item_id": "lesson.predict2", "option": "B", "text": "A small reading, because some field still passes through the coil.", "correct": false, "misconceptions": ["EMI-02"] },
+-    { "item_id": "lesson.predict2", "option": "C", "text": "Zero, because nothing is changing.", "correct": true, "misconceptions": [] },
+-
+-    { "item_id": "lesson.check2", "option": "A", "text": "A south pole, because opposite poles attract and the coil pulls the magnet in.", "correct": false, "misconceptions": ["EMI-04"] },
+-    { "item_id": "lesson.check2", "option": "B", "text": "A north pole, because the induced current opposes the approaching magnet.", "correct": true, "misconceptions": [] },
+-    { "item_id": "lesson.check2", "option": "C", "text": "Neither, because a coil cannot have magnetic poles.", "correct": false, "misconceptions": ["EMI-05"] }
++    {
++      "item_id": "lesson.predict1",
++      "option": "A",
++      "text": "Nothing. There is no battery in the circuit, so no current can flow.",
++      "correct": false,
++      "misconceptions": [
++        "EMI-01"
++      ]
++    },
++    {
++      "item_id": "lesson.predict1",
++      "option": "B",
++      "text": "It swings to one side and stays there while the magnet is inside.",
++      "correct": false,
++      "misconceptions": [
++        "EMI-02",
++        "EMI-07"
++      ]
++    },
++    {
++      "item_id": "lesson.predict1",
++      "option": "C",
++      "text": "It swings one way, then swings back the other way.",
++      "correct": true,
++      "misconceptions": []
++    },
++    {
++      "item_id": "lesson.predict1",
++      "option": "D",
++      "text": "It swings further the longer the magnet stays in the coil.",
++      "correct": false,
++      "misconceptions": [
++        "EMI-03"
++      ]
++    },
++    {
++      "item_id": "lesson.predict2",
++      "option": "A",
++      "text": "A large reading, because the field inside the coil is strong.",
++      "correct": false,
++      "misconceptions": [
++        "EMI-02"
++      ]
++    },
++    {
++      "item_id": "lesson.predict2",
++      "option": "B",
++      "text": "A small reading, because some field still passes through the coil.",
++      "correct": false,
++      "misconceptions": [
++        "EMI-02"
++      ]
++    },
++    {
++      "item_id": "lesson.predict2",
++      "option": "C",
++      "text": "Zero, because nothing is changing.",
++      "correct": true,
++      "misconceptions": []
++    },
++    {
++      "item_id": "lesson.check2",
++      "option": "A",
++      "text": "A south pole, because opposite poles attract and the coil pulls the magnet in.",
++      "correct": false,
++      "misconceptions": [
++        "EMI-04"
++      ]
++    },
++    {
++      "item_id": "lesson.check2",
++      "option": "B",
++      "text": "A north pole, because the induced current opposes the approaching magnet.",
++      "correct": true,
++      "misconceptions": []
++    },
++    {
++      "item_id": "lesson.check2",
++      "option": "C",
++      "text": "Neither, because a coil cannot have magnetic poles.",
++      "correct": false,
++      "misconceptions": [
++        "EMI-05"
++      ]
++    }
+   ],
+   "numeric_map": [
+     {
+       "item_id": "lesson.check3",
+-      "given": { "N": 250, "delta_phi": 0.0036, "delta_t": 0.15 },
++      "given": {
++        "N": 250,
++        "delta_phi": 0.0036,
++        "delta_t": 0.15
++      },
+       "unit": "V",
+       "correct_value": 6.0,
+       "tolerance": 0.02,
+       "fingerprints": [
+-        { "value": 0.024,   "misconceptions": ["EMI-08"], "working": "ΔΦ / Δt" },
+-        { "value": 0.135,   "misconceptions": ["EMI-09"], "working": "N × ΔΦ × Δt" },
+-        { "value": 0.000135,"misconceptions": ["EMI-08", "EMI-09"], "working": "ΔΦ × Δt (also without N)" },
+-        { "value": 6000000, "misconceptions": ["EMI-10"], "working": "3,6 × 10³ used for 3,6 × 10⁻³" },
+-        { "value": 6000,    "misconceptions": ["EMI-10"], "working": "exponent dropped: 250 × 3,6 / 0,15" },
+-        { "value": -6.0,    "misconceptions": ["EMI-11"], "working": "minus sign kept on a magnitude" }
++        {
++          "value": 0.024,
++          "misconceptions": [
++            "EMI-08"
++          ],
++          "working": "ΔΦ / Δt"
++        },
++        {
++          "value": 0.135,
++          "misconceptions": [
++            "EMI-09"
++          ],
++          "working": "N × ΔΦ × Δt"
++        },
++        {
++          "value": 0.000135,
++          "misconceptions": [
++            "EMI-08",
++            "EMI-09"
++          ],
++          "working": "ΔΦ × Δt (also without N)"
++        },
++        {
++          "value": 6000000,
++          "misconceptions": [
++            "EMI-10"
++          ],
++          "working": "3,6 × 10³ used for 3,6 × 10⁻³"
++        },
++        {
++          "value": 6000,
++          "misconceptions": [
++            "EMI-10"
++          ],
++          "working": "exponent dropped: 250 × 3,6 / 0,15"
++        },
++        {
++          "value": -6.0,
++          "misconceptions": [
++            "EMI-11"
++          ],
++          "working": "minus sign kept on a magnitude"
++        }
+       ]
+     }
+   ],
+@@ -153,8 +300,14 @@
+     {
+       "item_id": "lesson.check1",
+       "description": "Faraday's Law in words. The mark needs 'rate of change'.",
+-      "if_missing_any": ["rate of change", "rate at which", "changing"],
+-      "misconceptions": ["EMI-02"]
++      "if_missing_any": [
++        "rate of change",
++        "rate at which",
++        "changing"
++      ],
++      "misconceptions": [
++        "EMI-02"
++      ]
+     }
+   ]
+ }
+diff --git a/misconceptions/paper_links.csv b/misconceptions/paper_links.csv
+new file mode 100644
+index 0000000..18a1f2c
+--- /dev/null
++++ b/misconceptions/paper_links.csv
+@@ -0,0 +1,9 @@
++paper_id,q_id,marks,topic,misconception_ids,status,notes
++physci_p1_2018_nov_gr11,1.9,2,Electromagnetism,EMI-05,draft,Field pattern around a straight conductor. Same right-hand-rule foundation as coils having poles
++physci_p1_2018_nov_gr11,11.1,2,Electromagnetism,EMI-02,draft,Faraday's Law in words. Marks need 'rate of change'
++physci_p1_2018_nov_gr11,11.2,3,Electromagnetism,EMI-08;EMI-09;EMI-10,draft,Rearranging emf = N dPhi/dt for the change in flux
++physci_p1_2018_nov_gr11,11.3,4,Electromagnetism,EMI-12;EMI-13,draft,Phi = BA cos theta. Check angle and area units against the stem and memo
++physci_p1_2018_nov_gr11,11.4,1,Electromagnetism,EMI-02;EMI-06,draft,Effect on emf of rotating through 45 degrees in 0.05 s
++physci_p1_2018_nov_gr11,11.5,1,Electromagnetism,EMI-02;EMI-06,draft,Explanation for 11.4. Should reason with rate of change of flux
++physci_p1_2018_nov_gr11,11.6,1,Electromagnetism,EMI-04,draft,Induced pole at X when the north pole is pushed in (Lenz's Law)
++physci_p1_2018_nov_gr11,11.7,1,Electromagnetism,EMI-14,draft,Induced current direction from the induced pole
+diff --git a/pipeline/misconceptions.py b/pipeline/misconceptions.py
+index 22d325c..1b0891d 100644
+--- a/pipeline/misconceptions.py
++++ b/pipeline/misconceptions.py
+@@ -73,3 +73,18 @@ def diagnose_text(cat: dict, item_id: str, answer: str) -> list:
+         if rule["item_id"] == item_id and not any(k in answer for k in rule["if_missing_any"]):
+             found += rule["misconceptions"]
+     return _details(cat, found)
++
++
++def load_paper_links(cat: dict, name: str = "paper_links") -> list:
++    """Read the past-paper links CSV and check every misconception id exists."""
++    import csv
++
++    known = {m["id"] for m in cat["misconceptions"]}
++    with open(CATALOGUE_DIR / f"{name}.csv", encoding="utf-8", newline="") as f:
++        rows = list(csv.DictReader(f))
++    for row in rows:
++        row["misconception_ids"] = [i for i in row["misconception_ids"].split(";") if i]
++        unknown = set(row["misconception_ids"]) - known
++        if unknown:
++            raise ValueError(f"{row['paper_id']} {row['q_id']}: unknown ids {sorted(unknown)}")
++    return rows
+diff --git a/pipeline/topics.py b/pipeline/topics.py
+index 5034c3b..17cc332 100644
+--- a/pipeline/topics.py
++++ b/pipeline/topics.py
+@@ -9,6 +9,13 @@ Changes from the notebook version:
+   reflection) are included, since they are part of Grade 11 Paper 1.
+ * A ``needs_review`` flag marks questions where the top two topics are close
+   or nothing matched.
++
++v0.2 changes, from the teacher check of the November 2018 Paper 1:
++
++* Multi-word keywords match across line breaks ("refractive\nindex").
++* "power" removed from Electric circuits ("refracting power" is optics).
++* "weight" removed from Gravitation (it appears in most mechanics questions).
++* Added lift, slope, crate, free-body diagram, optical density, refracting.
+ """
+ import re
+ 
+@@ -19,23 +26,27 @@ TOPIC_KEYWORDS = {
+                 r"components?"],
+     "Newton's laws": [r"newton's (first|second|third) law", r"friction(al)?",
+                       r"normal force", r"incline[ds]?", r"tension", r"net force",
+-                      r"pulley", r"trolley", r"blocks?", r"inertia"],
++                      r"pulley", r"trolley", r"blocks?", r"inertia", r"lift",
++                      r"slope", r"crates?", r"free-body diagram"],
+     "Gravitation": [r"gravitational force", r"universal gravitation", r"planets?",
+-                    r"satellites?", r"moon", r"orbits?", r"weight"],
++                    r"satellites?", r"moon", r"orbits?"],
+     "Electrostatics": [r"coulomb's law", r"charges?", r"charged", r"electrostatic",
+                        r"electric field", r"spheres?", r"point charges?"],
+     "Electromagnetism": [r"magnetic", r"flux", r"faraday", r"induced", r"induction",
+                          r"solenoid", r"lenz", r"coils?", r"galvanometer", r"emf"],
+     "Electric circuits": [r"resistors?", r"resistance", r"circuits?", r"ammeter",
+                           r"voltmeter", r"potential difference", r"internal resistance",
+-                          r"ohm's law", r"power"],
++                          r"ohm's law"],
+     "Waves and optics": [r"wavefronts?", r"diffraction", r"slits?", r"refraction",
+-                         r"refractive index", r"snell's law", r"critical angle",
+-                         r"total internal reflection", r"interference"],
++                         r"refractive index", r"refract(s|ed|ing)?", r"optical density",
++                         r"optically (dense|denser|less dense)", r"snell's law",
++                         r"critical angle", r"total internal reflection", r"interference"],
+ }
+ 
+ _PATTERNS = {
+-    topic: [re.compile(rf"\b{kw}\b", re.I) for kw in kws]
++    # A space in a keyword matches any whitespace, because PDF extraction often
++    # breaks a phrase such as "refractive index" across two lines.
++    topic: [re.compile(rf"\b{kw.replace(' ', r'\s+')}\b", re.I) for kw in kws]
+     for topic, kws in TOPIC_KEYWORDS.items()
+ }
+ 
+diff --git a/tests/test_pipeline.py b/tests/test_pipeline.py
+index 83b0454..3d8aaa1 100644
+--- a/tests/test_pipeline.py
++++ b/tests/test_pipeline.py
+@@ -96,3 +96,43 @@ def test_validate_rejects_unknown_ids(cat):
+         {"item_id": "x", "option": "A", "correct": False, "misconceptions": ["EMI-99"]}]}
+     with pytest.raises(ValueError):
+         mc.validate(broken)
++
++
++# Real items from the November 2018 Paper 1, with the topic the teacher assigned.
++# The v0.1 tagger got 1.4, 1.5 and 1.6 wrong; these tests stop that coming back.
++TEACHER_CHECKED = {
++    "1.4": ("1.4 A man in a lift is moving upwards at a CONSTANT SPEED. The weight of the\n"
++            "man is W. According to Newton's Third Law, the reaction force of the\n"
++            "weight W is the force of ... A the floor on the man. B Earth on the man.\n"
++            "C the man on the floor. D the man on Earth. (2)", "Newton's laws"),
++    "1.5": ("1.5 The optical density of a medium ... A will be high if the refraction of light\n"
++            "is less. B is a measure of the refracting power of the medium. C is less when\n"
++            "light bends towards the normal when entering the medium. D will be high if light\n"
++            "moves faster through the medium. (2)", "Waves and optics"),
++    "1.6": ("1.6 In which ONE of the graphs below will the gradient represent the refractive\n"
++            "index of a material when light passes from the air through the material? (2)",
++            "Waves and optics"),
++    "5": ("5.1 Draw a free-body diagram of ALL the forces acting on the crate while it moves\n"
++          "from B to C. (3) 5.2 Calculate the magnitude of the acceleration of the crate while\n"
++          "it moves from A to B. (4) 5.3 Write down the direction of the acceleration of the\n"
++          "crate while it slows down from B to C. Write only UP THE SLOPE or DOWN THE SLOPE. (1)\n"
++          "5.4 The magnitude of the net acceleration from B to C is 1,2 m·s-2. Calculate the\n"
++          "magnitude of the frictional force acting on the crate. (4)", "Newton's laws"),
++}
++
++
++@pytest.mark.parametrize("q_id", TEACHER_CHECKED)
++def test_matches_teacher_tags(q_id):
++    text, topic = TEACHER_CHECKED[q_id]
++    assert tag_text(text)["topic"] == topic
++
++
++def test_keywords_match_across_line_breaks():
++    assert tag_text("the refractive\nindex of glass")["topic"] == "Waves and optics"
++
++
++def test_paper_links_use_known_ids(cat):
++    rows = mc.load_paper_links(cat)
++    q11 = [r for r in rows if r["q_id"].startswith("11.")]
++    assert sum(int(r["marks"]) for r in q11) == 13  # matches the printed [13]
++    assert all(r["misconception_ids"] for r in rows)
+-- 
+2.43.0
+
