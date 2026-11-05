@@ -48,6 +48,16 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 - [x] Exam-style questions with marking answers
 - [x] Fully client-side, no data collected
 
+## Progress on v2
+
+- [x] Past-paper extraction verified on one paper (Physical Sciences P1, November 2018): 150 marks, every question total matches the printed total
+- [x] Mark verification and topic tagging moved from the notebook into tested code in [`pipeline/`](pipeline/)
+- [x] First misconception catalogue: 11 electromagnetic induction misconceptions, with every wrong option in the lesson mapped to one ([`misconceptions/electromagnetic_induction.json`](misconceptions/electromagnetic_induction.json))
+- [x] Numeric fingerprints: a wrong answer to the EMF calculation (e.g. 0,024 V or 0,135 V) is traced to the step that went wrong
+- [ ] Teacher-checked topic tags for the first paper
+- [ ] More papers, especially ones with electromagnetism questions
+- [ ] Literature references for each misconception
+
 ## Roadmap (v2): an LLM-powered misconception engine
 
 v2 turns Induction Lab from a single lesson into a **misconception diagnosis and feedback system** for Physical Sciences and Life Sciences.
@@ -100,7 +110,7 @@ Collect publicly available past exam papers and memoranda and convert them into 
 
 ---
 
-## Repository structure (planned)
+## Repository structure
 
 ```
 induction-lab/
@@ -108,11 +118,12 @@ induction-lab/
 ├── css/                  # Styles
 ├── js/                   # Simulation and lesson logic
 ├── data/
-│   ├── papers/           # Raw past papers and memos (links and metadata)
-│   └── questions.json    # Tagged question bank
-├── pipeline/             # Scraping, extraction and tagging scripts
-├── misconceptions/       # Misconception catalogue and mappings
-├── evaluation/           # Notebooks and results
+│   ├── SCHEMA.md         # Question bank columns  (done)
+│   └── papers/           # Raw past papers and memos (planned)
+├── pipeline/             # Verification, tagging, misconception lookup  (done)
+├── misconceptions/       # Misconception catalogue and mappings  (done)
+├── tests/                # pytest tests for the pipeline  (done)
+├── evaluation/           # Notebooks and results (planned)
 └── README.md
 ```
 
