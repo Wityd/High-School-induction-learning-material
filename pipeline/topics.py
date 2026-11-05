@@ -9,6 +9,13 @@ Changes from the notebook version:
   reflection) are included, since they are part of Grade 11 Paper 1.
 * A ``needs_review`` flag marks questions where the top two topics are close
   or nothing matched.
+
+v0.2 changes, from the teacher check of the November 2018 Paper 1:
+
+* Multi-word keywords match across line breaks ("refractive\nindex").
+* "power" removed from Electric circuits ("refracting power" is optics).
+* "weight" removed from Gravitation (it appears in most mechanics questions).
+* Added lift, slope, crate, free-body diagram, optical density, refracting.
 """
 import re
 
@@ -19,23 +26,27 @@ TOPIC_KEYWORDS = {
                 r"components?"],
     "Newton's laws": [r"newton's (first|second|third) law", r"friction(al)?",
                       r"normal force", r"incline[ds]?", r"tension", r"net force",
-                      r"pulley", r"trolley", r"blocks?", r"inertia"],
+                      r"pulley", r"trolley", r"blocks?", r"inertia", r"lift",
+                      r"slope", r"crates?", r"free-body diagram"],
     "Gravitation": [r"gravitational force", r"universal gravitation", r"planets?",
-                    r"satellites?", r"moon", r"orbits?", r"weight"],
+                    r"satellites?", r"moon", r"orbits?"],
     "Electrostatics": [r"coulomb's law", r"charges?", r"charged", r"electrostatic",
                        r"electric field", r"spheres?", r"point charges?"],
     "Electromagnetism": [r"magnetic", r"flux", r"faraday", r"induced", r"induction",
                          r"solenoid", r"lenz", r"coils?", r"galvanometer", r"emf"],
     "Electric circuits": [r"resistors?", r"resistance", r"circuits?", r"ammeter",
                           r"voltmeter", r"potential difference", r"internal resistance",
-                          r"ohm's law", r"power"],
+                          r"ohm's law"],
     "Waves and optics": [r"wavefronts?", r"diffraction", r"slits?", r"refraction",
-                         r"refractive index", r"snell's law", r"critical angle",
-                         r"total internal reflection", r"interference"],
+                         r"refractive index", r"refract(s|ed|ing)?", r"optical density",
+                         r"optically (dense|denser|less dense)", r"snell's law",
+                         r"critical angle", r"total internal reflection", r"interference"],
 }
 
 _PATTERNS = {
-    topic: [re.compile(rf"\b{kw}\b", re.I) for kw in kws]
+    # A space in a keyword matches any whitespace, because PDF extraction often
+    # breaks a phrase such as "refractive index" across two lines.
+    topic: [re.compile(rf"\b{kw.replace(' ', r'\s+')}\b", re.I) for kw in kws]
     for topic, kws in TOPIC_KEYWORDS.items()
 }
 

@@ -3,7 +3,7 @@
   "subtopic": "Electromagnetic induction (Faraday's Law and Lenz's Law)",
   "grade": 11,
   "curriculum": "CAPS Physical Sciences",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "notes": "Drafted from the wrong options in Induction Lab v1. Add literature references and classroom evidence to each entry before using this for research claims.",
   "misconceptions": [
     {
@@ -116,36 +116,183 @@
       "why_learners_think_this": "They copy the sign from the formula without knowing what it means.",
       "remediation": "Link the minus sign to the Lenz's Law question so it carries meaning.",
       "references": []
+    },
+    {
+      "id": "EMI-12",
+      "type": "procedural",
+      "label": "Angle measured from the wrong line",
+      "learner_says": "In Φ = BA cos θ, θ is the angle between the field and the plane of the coil.",
+      "correct_idea": "θ is the angle between the magnetic field and the normal to the coil's surface. A field perpendicular to the coil gives θ = 0° and the largest flux.",
+      "why_learners_think_this": "The angle shown on a sketch is often the one with the coil itself, and learners use it without checking.",
+      "remediation": "Ask the learner to draw the normal on the sketch before substituting, and check: field along the normal means maximum flux.",
+      "references": [],
+      "status": "draft: confirm against the full question and memo"
+    },
+    {
+      "id": "EMI-13",
+      "type": "procedural",
+      "label": "Area not converted to square metres",
+      "learner_says": "The area is 20 cm², so A = 20 in the formula. (or 20 cm² = 0,2 m²)",
+      "correct_idea": "1 m² = 10⁴ cm², so 20 cm² = 2 × 10⁻³ m². Area converts with the square of the length factor.",
+      "why_learners_think_this": "Converting an area like a length (÷100 instead of ÷10 000), or not converting at all.",
+      "remediation": "Draw 1 m² as a 100 cm × 100 cm square to show why the factor is 10 000.",
+      "references": [],
+      "status": "draft: confirm against the full question and memo"
+    },
+    {
+      "id": "EMI-14",
+      "type": "procedural",
+      "label": "Right-hand rule misapplied to a solenoid",
+      "learner_says": "Picks the current direction from the induced pole using the wrong hand or with fingers and thumb swapped.",
+      "correct_idea": "For a solenoid, curl the fingers of the right hand in the direction of the current. The thumb points to the north pole.",
+      "why_learners_think_this": "Several hand rules are taught in Grade 10 and 11, and learners mix them up.",
+      "remediation": "After using Lenz's Law to find the induced pole, apply the solenoid rule as a separate, named second step.",
+      "references": [],
+      "status": "draft: confirm against the full question and memo"
     }
   ],
   "item_map": [
-    { "item_id": "lesson.predict1", "option": "A", "text": "Nothing. There is no battery in the circuit, so no current can flow.", "correct": false, "misconceptions": ["EMI-01"] },
-    { "item_id": "lesson.predict1", "option": "B", "text": "It swings to one side and stays there while the magnet is inside.", "correct": false, "misconceptions": ["EMI-02", "EMI-07"] },
-    { "item_id": "lesson.predict1", "option": "C", "text": "It swings one way, then swings back the other way.", "correct": true, "misconceptions": [] },
-    { "item_id": "lesson.predict1", "option": "D", "text": "It swings further the longer the magnet stays in the coil.", "correct": false, "misconceptions": ["EMI-03"] },
-
-    { "item_id": "lesson.predict2", "option": "A", "text": "A large reading, because the field inside the coil is strong.", "correct": false, "misconceptions": ["EMI-02"] },
-    { "item_id": "lesson.predict2", "option": "B", "text": "A small reading, because some field still passes through the coil.", "correct": false, "misconceptions": ["EMI-02"] },
-    { "item_id": "lesson.predict2", "option": "C", "text": "Zero, because nothing is changing.", "correct": true, "misconceptions": [] },
-
-    { "item_id": "lesson.check2", "option": "A", "text": "A south pole, because opposite poles attract and the coil pulls the magnet in.", "correct": false, "misconceptions": ["EMI-04"] },
-    { "item_id": "lesson.check2", "option": "B", "text": "A north pole, because the induced current opposes the approaching magnet.", "correct": true, "misconceptions": [] },
-    { "item_id": "lesson.check2", "option": "C", "text": "Neither, because a coil cannot have magnetic poles.", "correct": false, "misconceptions": ["EMI-05"] }
+    {
+      "item_id": "lesson.predict1",
+      "option": "A",
+      "text": "Nothing. There is no battery in the circuit, so no current can flow.",
+      "correct": false,
+      "misconceptions": [
+        "EMI-01"
+      ]
+    },
+    {
+      "item_id": "lesson.predict1",
+      "option": "B",
+      "text": "It swings to one side and stays there while the magnet is inside.",
+      "correct": false,
+      "misconceptions": [
+        "EMI-02",
+        "EMI-07"
+      ]
+    },
+    {
+      "item_id": "lesson.predict1",
+      "option": "C",
+      "text": "It swings one way, then swings back the other way.",
+      "correct": true,
+      "misconceptions": []
+    },
+    {
+      "item_id": "lesson.predict1",
+      "option": "D",
+      "text": "It swings further the longer the magnet stays in the coil.",
+      "correct": false,
+      "misconceptions": [
+        "EMI-03"
+      ]
+    },
+    {
+      "item_id": "lesson.predict2",
+      "option": "A",
+      "text": "A large reading, because the field inside the coil is strong.",
+      "correct": false,
+      "misconceptions": [
+        "EMI-02"
+      ]
+    },
+    {
+      "item_id": "lesson.predict2",
+      "option": "B",
+      "text": "A small reading, because some field still passes through the coil.",
+      "correct": false,
+      "misconceptions": [
+        "EMI-02"
+      ]
+    },
+    {
+      "item_id": "lesson.predict2",
+      "option": "C",
+      "text": "Zero, because nothing is changing.",
+      "correct": true,
+      "misconceptions": []
+    },
+    {
+      "item_id": "lesson.check2",
+      "option": "A",
+      "text": "A south pole, because opposite poles attract and the coil pulls the magnet in.",
+      "correct": false,
+      "misconceptions": [
+        "EMI-04"
+      ]
+    },
+    {
+      "item_id": "lesson.check2",
+      "option": "B",
+      "text": "A north pole, because the induced current opposes the approaching magnet.",
+      "correct": true,
+      "misconceptions": []
+    },
+    {
+      "item_id": "lesson.check2",
+      "option": "C",
+      "text": "Neither, because a coil cannot have magnetic poles.",
+      "correct": false,
+      "misconceptions": [
+        "EMI-05"
+      ]
+    }
   ],
   "numeric_map": [
     {
       "item_id": "lesson.check3",
-      "given": { "N": 250, "delta_phi": 0.0036, "delta_t": 0.15 },
+      "given": {
+        "N": 250,
+        "delta_phi": 0.0036,
+        "delta_t": 0.15
+      },
       "unit": "V",
       "correct_value": 6.0,
       "tolerance": 0.02,
       "fingerprints": [
-        { "value": 0.024,   "misconceptions": ["EMI-08"], "working": "ΔΦ / Δt" },
-        { "value": 0.135,   "misconceptions": ["EMI-09"], "working": "N × ΔΦ × Δt" },
-        { "value": 0.000135,"misconceptions": ["EMI-08", "EMI-09"], "working": "ΔΦ × Δt (also without N)" },
-        { "value": 6000000, "misconceptions": ["EMI-10"], "working": "3,6 × 10³ used for 3,6 × 10⁻³" },
-        { "value": 6000,    "misconceptions": ["EMI-10"], "working": "exponent dropped: 250 × 3,6 / 0,15" },
-        { "value": -6.0,    "misconceptions": ["EMI-11"], "working": "minus sign kept on a magnitude" }
+        {
+          "value": 0.024,
+          "misconceptions": [
+            "EMI-08"
+          ],
+          "working": "ΔΦ / Δt"
+        },
+        {
+          "value": 0.135,
+          "misconceptions": [
+            "EMI-09"
+          ],
+          "working": "N × ΔΦ × Δt"
+        },
+        {
+          "value": 0.000135,
+          "misconceptions": [
+            "EMI-08",
+            "EMI-09"
+          ],
+          "working": "ΔΦ × Δt (also without N)"
+        },
+        {
+          "value": 6000000,
+          "misconceptions": [
+            "EMI-10"
+          ],
+          "working": "3,6 × 10³ used for 3,6 × 10⁻³"
+        },
+        {
+          "value": 6000,
+          "misconceptions": [
+            "EMI-10"
+          ],
+          "working": "exponent dropped: 250 × 3,6 / 0,15"
+        },
+        {
+          "value": -6.0,
+          "misconceptions": [
+            "EMI-11"
+          ],
+          "working": "minus sign kept on a magnitude"
+        }
       ]
     }
   ],
@@ -153,8 +300,14 @@
     {
       "item_id": "lesson.check1",
       "description": "Faraday's Law in words. The mark needs 'rate of change'.",
-      "if_missing_any": ["rate of change", "rate at which", "changing"],
-      "misconceptions": ["EMI-02"]
+      "if_missing_any": [
+        "rate of change",
+        "rate at which",
+        "changing"
+      ],
+      "misconceptions": [
+        "EMI-02"
+      ]
     }
   ]
 }

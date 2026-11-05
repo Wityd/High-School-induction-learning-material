@@ -52,9 +52,12 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 
 - [x] Past-paper extraction verified on one paper (Physical Sciences P1, November 2018): 150 marks, every question total matches the printed total
 - [x] Mark verification and topic tagging moved from the notebook into tested code in [`pipeline/`](pipeline/)
-- [x] First misconception catalogue: 11 electromagnetic induction misconceptions, with every wrong option in the lesson mapped to one ([`misconceptions/electromagnetic_induction.json`](misconceptions/electromagnetic_induction.json))
+- [x] First misconception catalogue: 14 electromagnetic induction misconceptions, with every wrong option in the lesson mapped to one ([`misconceptions/electromagnetic_induction.json`](misconceptions/electromagnetic_induction.json))
 - [x] Numeric fingerprints: a wrong answer to the EMF calculation (e.g. 0,024 V or 0,135 V) is traced to the step that went wrong
-- [ ] Teacher-checked topic tags for the first paper
+- [x] First paper fully tagged and teacher-checked: 150 of 150 marks (Newton's laws 43, Waves and optics 32, Electrostatics 24, Electric circuits 16, Electromagnetism 15, Vectors 12, Gravitation 8)
+- [x] Tagger improved from the teacher check (line-break matching, fewer misleading keywords), with the corrected items kept as tests
+- [x] Past-paper questions linked to misconceptions: Question 11 (13 marks, electromagnetism) mapped item by item in [`misconceptions/paper_links.csv`](misconceptions/paper_links.csv) (draft, pending memo check)
+- [ ] Confirm the Question 11 links and answers against the memorandum
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception
 

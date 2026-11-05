@@ -96,3 +96,43 @@ def test_validate_rejects_unknown_ids(cat):
         {"item_id": "x", "option": "A", "correct": False, "misconceptions": ["EMI-99"]}]}
     with pytest.raises(ValueError):
         mc.validate(broken)
+
+
+# Real items from the November 2018 Paper 1, with the topic the teacher assigned.
+# The v0.1 tagger got 1.4, 1.5 and 1.6 wrong; these tests stop that coming back.
+TEACHER_CHECKED = {
+    "1.4": ("1.4 A man in a lift is moving upwards at a CONSTANT SPEED. The weight of the\n"
+            "man is W. According to Newton's Third Law, the reaction force of the\n"
+            "weight W is the force of ... A the floor on the man. B Earth on the man.\n"
+            "C the man on the floor. D the man on Earth. (2)", "Newton's laws"),
+    "1.5": ("1.5 The optical density of a medium ... A will be high if the refraction of light\n"
+            "is less. B is a measure of the refracting power of the medium. C is less when\n"
+            "light bends towards the normal when entering the medium. D will be high if light\n"
+            "moves faster through the medium. (2)", "Waves and optics"),
+    "1.6": ("1.6 In which ONE of the graphs below will the gradient represent the refractive\n"
+            "index of a material when light passes from the air through the material? (2)",
+            "Waves and optics"),
+    "5": ("5.1 Draw a free-body diagram of ALL the forces acting on the crate while it moves\n"
+          "from B to C. (3) 5.2 Calculate the magnitude of the acceleration of the crate while\n"
+          "it moves from A to B. (4) 5.3 Write down the direction of the acceleration of the\n"
+          "crate while it slows down from B to C. Write only UP THE SLOPE or DOWN THE SLOPE. (1)\n"
+          "5.4 The magnitude of the net acceleration from B to C is 1,2 m·s-2. Calculate the\n"
+          "magnitude of the frictional force acting on the crate. (4)", "Newton's laws"),
+}
+
+
+@pytest.mark.parametrize("q_id", TEACHER_CHECKED)
+def test_matches_teacher_tags(q_id):
+    text, topic = TEACHER_CHECKED[q_id]
+    assert tag_text(text)["topic"] == topic
+
+
+def test_keywords_match_across_line_breaks():
+    assert tag_text("the refractive\nindex of glass")["topic"] == "Waves and optics"
+
+
+def test_paper_links_use_known_ids(cat):
+    rows = mc.load_paper_links(cat)
+    q11 = [r for r in rows if r["q_id"].startswith("11.")]
+    assert sum(int(r["marks"]) for r in q11) == 13  # matches the printed [13]
+    assert all(r["misconception_ids"] for r in rows)

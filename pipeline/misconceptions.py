@@ -73,3 +73,18 @@ def diagnose_text(cat: dict, item_id: str, answer: str) -> list:
         if rule["item_id"] == item_id and not any(k in answer for k in rule["if_missing_any"]):
             found += rule["misconceptions"]
     return _details(cat, found)
+
+
+def load_paper_links(cat: dict, name: str = "paper_links") -> list:
+    """Read the past-paper links CSV and check every misconception id exists."""
+    import csv
+
+    known = {m["id"] for m in cat["misconceptions"]}
+    with open(CATALOGUE_DIR / f"{name}.csv", encoding="utf-8", newline="") as f:
+        rows = list(csv.DictReader(f))
+    for row in rows:
+        row["misconception_ids"] = [i for i in row["misconception_ids"].split(";") if i]
+        unknown = set(row["misconception_ids"]) - known
+        if unknown:
+            raise ValueError(f"{row['paper_id']} {row['q_id']}: unknown ids {sorted(unknown)}")
+    return rows
