@@ -1,0 +1,21 @@
+# Llama 3.1 8B, Run 3: rows that disagreed with the teacher or were flagged.
+# Copied from the printed Colab output. The full per-row CSV was not saved.
+# Rows not listed (CASE_11.1_01 to 11.1_04, 11.2_01, 11.2_03) agreed with the
+# teacher and were not flagged.
+CASE_11.2_02 | teacher: EMI-08 | AI: EMI-09 | marks: 1 vs 1 | disagrees with final-answer rules (known_error: ['EMI-08'])
+CASE_11.2_04 | teacher: EMI-09 | AI: EMI-08 | marks: 1 vs 2 | disagrees with final-answer rules (known_error: ['EMI-09'])
+CASE_11.3_01 | teacher: - | AI: EMI-13 | marks: 4 vs 4 | rules say correct, LLM found ['EMI-13']
+CASE_11.3_02 | teacher: EMI-15 | AI: EMI-12 | marks: 2 vs 4 |
+CASE_11.3_03 | teacher: EMI-13 | AI: EMI-13 | marks: 2 vs 4 |
+CASE_11.3_04 | teacher: - | AI: EMI-13 | marks: 4 vs 4 | rules say carried_forward, LLM found ['EMI-13']
+CASE_11.4_01 | teacher: - | AI: EMI-06 | marks: 1 vs 1 |
+CASE_11.4_02 | teacher: EMI-09 | AI: EMI-06 | marks: 0 vs 1 | disagrees with final-answer rules (known_error: ['EMI-09'])
+CASE_11.4_03 | teacher: EMI-06 | AI: EMI-06 | marks: 0 vs 1 |
+CASE_11.5_01 | teacher: - | AI: EMI-06 | marks: 1 vs 1 |
+CASE_11.5_02 | teacher: - | AI: EMI-06 | marks: 1 vs 1 |
+CASE_11.5_03 | teacher: EMI-17 | AI: EMI-17 | marks: 0 vs 1 |
+CASE_11.6_01 | teacher: - | AI: EMI-04 | marks: 1 vs 1 |
+CASE_11.6_02 | teacher: EMI-04 | AI: EMI-04 | marks: 0 vs 1 |
+CASE_11.7_01 | teacher: EMI-14 | AI: EMI-14 | marks: 0 vs 1 |
+CASE_11.7_02 | teacher: - | AI: EMI-14 | marks: 1 vs 1 |
+CASE_11.7_03 | teacher: EMI-04 | AI: EMI-14 | marks: 1 vs 1 |

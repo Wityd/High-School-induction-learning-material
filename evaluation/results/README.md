@@ -47,7 +47,7 @@ changed, so a second run measures the effect of the format fix alone.
 
 ## Run 2: Llama 3.1 8B, ticks by number
 
-Files: `llama3.1-8b_v2.csv`, `llama3.1-8b_v2_report.json`
+Files: `llama3.1-8b_v2_report.json`, `llama3.1-8b_v2_printed_output.txt`. The full per-row CSV was not saved; these files are copied from the printed Colab output.
 
 | Measure | Run 1 | Run 2 |
 |---|---|---|
@@ -71,7 +71,7 @@ for every tick and cannot add extra ones.
 
 ## Run 3: Llama 3.1 8B, required tick fields
 
-Files: `llama3.1-8b_v3.csv`, `llama3.1-8b_v3_report.json`
+Files: `llama3.1-8b_v3_report.json`, `llama3.1-8b_v3_printed_output.txt`. The full per-row CSV was not saved; these files are copied from the printed Colab output.
 
 | Measure | Run 1 | Run 2 | Run 3 |
 |---|---|---|---|
