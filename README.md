@@ -68,7 +68,7 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 - [x] Second run: Llama returned no ticks at all under JSON mode; the checks gave no marks instead of wrong ones. Fixed by making every memo tick a required field
 - [x] Third run: 11 of 23 labels right (kappa 0.37), marks right on 15 of 23, but 12 errors were not flagged. Fixed by letting the rules set marks wherever the answer is a fixed word, and by counting silent errors
 - [x] Fourth run: marks right on 19 of 23 and silent errors down to 5, as estimated beforehand. The remaining errors are the model's own (labels unchanged at 11 of 23)
-- [ ] The same 23 cases on a larger free model, with no changes, to compare
+- [x] Same 23 cases on Qwen 2.5 14B, with no changes: kappa 0.65 (Llama 0.37), false alarms on correct work down from 7 to 3, but harsher marks. One Afrikaans answer was marked down, a possible language bias to test further
 - [ ] Run the evaluation on real, anonymised learner scripts and publish the results, failures included
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception

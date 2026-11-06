@@ -141,7 +141,59 @@ EMI-08 with EMI-09, never finds EMI-15, and raises false alarms on correct
 work. Code checks cannot fix that; a stronger model or a better prompt might.
 The 9 items sent to the teacher are the system working as designed.
 
-## Next
+## Run 5: Qwen 2.5 14B (Ollama, Google Colab T4, temperature 0)
 
-Run the same 23 cases, with no changes to the code or prompt, on a larger free
-model to see whether the remaining errors come from model size.
+Files: `qwen2.5-14b_v1.csv`, `qwen2.5-14b_v1_report.json`
+
+Same 23 cases, same code and prompt as Llama Run 4. Nothing was changed
+between the two runs.
+
+| Measure | Llama 3.1 8B (Run 4) | Qwen 2.5 14B |
+|---|---|---|
+| Exact misconception match | 11 of 23 | **14 of 23** |
+| Cohen's kappa | 0.37 (fair) | **0.65 (substantial)** |
+| False alarms on the 11 correct cases | 7 | **3** |
+| Marks exactly right | **19 of 23** | 16 of 23 |
+| Mean marks difference | **0.26** | 0.48 |
+| Sent to the teacher | 9 | 8 |
+| Silent errors | 5 | **4** |
+
+**The larger model diagnoses much better.** Kappa nearly doubled, false alarms
+on correct work fell from 7 to 3, and it found EMI-15 (11.3_02), which Llama
+never found in any run. Much of what was left after Run 4 was the model, not
+the system.
+
+**But it marks more harshly.** Llama gave too many marks; Qwen gives too few.
+It gave 0 of 4 to a correct carried-forward answer (11.3_04: no positive
+marking, and an EMI-15 that is not there; the rules caught this) and 1 where
+the teacher gave 2 on 11.3_02 and 11.3_03. All four of its silent errors are
+about marks.
+
+**Possible language bias, one case.** The Afrikaans definition (11.1_04) got
+0 of 2, while the same answer in English got full marks, although the prompt
+says Afrikaans is marked the same. One case proves nothing, but fairness across
+languages matters for South African learners. It needs more Afrikaans (and
+isiZulu and other) cases before any real use.
+
+**Other errors.** It used EMI-05 ("a coil cannot have poles") for 11.7 answers
+it does not fit, and confused EMI-13 with EMI-15 once.
+
+**Caveat.** Qwen is a different model family, not only a larger model, so the
+difference is not due to size alone. A pure size comparison would use two
+sizes of one family (for example Qwen 2.5 7B and 14B).
+
+## What the five runs show
+
+1. **Format before marking.** Runs 1 to 3 were mostly about getting a small
+   model to return the required structure. Constrained JSON with one required
+   field per memo tick solved it.
+2. **Let rules decide what rules can decide.** Rule-set marks for one-word
+   answers cut silent errors from 12 to 5, as estimated before the run.
+3. **A larger model diagnoses better, but neither model marks calculations and
+   explanations reliably.** This supports the design: the LLM diagnoses, the
+   rules mark where they can, and the teacher checks the rest.
+4. **Count silent errors.** Agreement numbers alone hide the cases that would
+   reach a learner wrong without anyone being told.
+
+These are 23 constructed cases, so the results show what the system can
+detect, not how it performs on real learners.
