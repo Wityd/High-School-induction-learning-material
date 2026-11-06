@@ -259,3 +259,99 @@ def test_feedback_reads_like_a_teacher(cat):
     text = feedback(list(mark_q11(cat, 0.56, 0.56 / K)))
     assert "11.2:" in text and "EMI-08" in text
     assert "11.3: 4/4" in text and "positive marking" in text
+
+
+# LLM layer, tested with a fake client: no API key, no cost, no learner data.
+from types import SimpleNamespace
+
+from pipeline.llm_diagnose import Diagnosis, TickDecision, diagnose_working
+
+
+class FakeClient:
+    """Stands in for anthropic.Anthropic(); returns a fixed diagnosis."""
+
+    def __init__(self, diagnosis=None, stop_reason="end_turn"):
+        self.calls = []
+
+        def parse(**kwargs):
+            self.calls.append(kwargs)
+            return SimpleNamespace(stop_reason=stop_reason, parsed_output=diagnosis)
+
+        self.beta = SimpleNamespace(messages=SimpleNamespace(parse=parse))
+
+
+def ticks_for(cat, item_id, earned):
+    item = next(i for i in cat["numeric_map"] if i["item_id"] == item_id)
+    return [TickDecision(tick=t, earned=e, reason="") for t, e in zip(item["memo_ticks"], earned)]
+
+
+WORKING_EMI15 = "ΔΦ = BA cos 45°\n-0,0014 = B (0,03)² cos 45°\nB = 2,20 T"
+
+
+def test_llm_and_rules_agree(cat):
+    d = Diagnosis(misconception_ids=["EMI-15"], evidence="ΔΦ = BA cos 45°",
+                  ticks=ticks_for(cat, Q11 + ".3", [False, True, False, False]),
+                  confidence="high", feedback_for_teacher="Initial flux ignored.")
+    client = FakeClient(d)
+    r = diagnose_working(client, cat, Q11 + ".3", WORKING_EMI15, 2.20, earlier_answer=-0.0014)
+    assert r["misconception_ids"] == ["EMI-15"] and r["marks"] == 1
+    assert r["needs_teacher"] is False
+    sent = client.calls[0]
+    assert sent["model"] == "claude-opus-5-5" and sent["fallbacks"] == "default"
+    assert WORKING_EMI15 in sent["messages"][0]["content"]
+    assert "EMI-15" in sent["system"][0]["text"]  # catalogue is in the prompt
+
+
+def test_invented_id_is_removed_and_flagged(cat):
+    d = Diagnosis(misconception_ids=["EMI-15", "EMI-99"], evidence="...",
+                  ticks=ticks_for(cat, Q11 + ".3", [False, True, False, False]),
+                  confidence="high", feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + ".3", WORKING_EMI15, 2.20, -0.0014)
+    assert r["misconception_ids"] == ["EMI-15"]
+    assert r["needs_teacher"] and "EMI-99" in r["problems"][0]
+
+
+def test_disagreement_with_rules_goes_to_teacher(cat):
+    """The LLM says EMI-13, but 2,20 T is an EMI-15/EMI-12 fingerprint."""
+    d = Diagnosis(misconception_ids=["EMI-13"], evidence="...",
+                  ticks=ticks_for(cat, Q11 + ".3", [True, True, False, False]),
+                  confidence="high", feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + ".3", WORKING_EMI15, 2.20, -0.0014)
+    assert r["needs_teacher"] and "disagrees" in r["problems"][-1]
+
+
+def test_wrong_tick_list_and_low_confidence_flagged(cat):
+    d = Diagnosis(misconception_ids=[], evidence="no misconception",
+                  ticks=[TickDecision(tick="made up", earned=True, reason="")],
+                  confidence="low", feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + ".2", "7 = 400 x / 0,08", -0.0014)
+    assert r["needs_teacher"] and "memo" in r["problems"][0]
+
+
+def test_refusal_goes_to_teacher(cat):
+    r = diagnose_working(FakeClient(None, "refusal"), cat, Q11 + ".2", "...", -0.0014)
+    assert r["needs_teacher"] is True
+
+
+# Evaluation report, on a tiny hand-made table (not real learner data).
+from pipeline.evaluate import cohen_kappa, report
+
+
+def test_report_numbers():
+    rows = [
+        {"teacher_ids": "EMI-08", "llm_ids": "EMI-08", "teacher_marks": "1", "llm_marks": "1", "needs_teacher": "False"},
+        {"teacher_ids": "", "llm_ids": "", "teacher_marks": "3", "llm_marks": "3", "needs_teacher": "False"},
+        {"teacher_ids": "EMI-15", "llm_ids": "EMI-12", "teacher_marks": "1", "llm_marks": "2", "needs_teacher": "True"},
+        {"teacher_ids": "", "llm_ids": "EMI-13", "teacher_marks": "4", "llm_marks": "3", "needs_teacher": "True"},
+    ]
+    r = report(rows)
+    assert r["exact_id_agreement"] == 0.5
+    assert r["per_id"]["EMI-08"] == {"precision": 1.0, "recall": 1.0, "teacher_count": 1}
+    assert r["per_id"]["EMI-15"]["recall"] == 0.0
+    assert r["marks_exact_agreement"] == 0.5 and r["marks_mean_abs_diff"] == 0.5
+    assert r["sent_to_teacher"] == 2
+
+
+def test_kappa():
+    assert cohen_kappa([True, False, True, False], [True, False, True, False]) == 1.0
+    assert cohen_kappa([True, True, False, False], [True, False, True, False]) == 0.0

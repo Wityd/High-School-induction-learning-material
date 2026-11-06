@@ -59,7 +59,9 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 - [x] Past-paper questions linked to misconceptions: Question 11 (13 marks, electromagnetism) mapped item by item in [`misconceptions/paper_links.csv`](misconceptions/paper_links.csv)
 - [x] Question 11 verified against the DBE marking guidelines: answers, tick allocation and positive marking recorded; wrong answers to 11.2 and 11.3 traced to specific misconceptions (e.g. B = 2,20 T means the initial flux was ignored)
 - [x] Positive marking in the engine ([`pipeline/marking.py`](pipeline/marking.py)): 11.3 is marked using the learner's own 11.2 answer, so one mistake is not punished twice, and a new mistake in 11.3 is still found. Method marks for wrong answers are reported as a range until the learner's working is read
-- [ ] Learner working, not just final answers: some wrong numbers (2,20 T) point to two different misconceptions
+- [x] LLM layer built ([`pipeline/llm_diagnose.py`](pipeline/llm_diagnose.py)): Claude reads a learner's written working, decides which memo ticks it earns and names misconceptions from the catalogue only, quoting the working as evidence. Code then checks the result: invented ids are removed, the tick list must match the memo, and any disagreement with the final-answer rules goes to the teacher
+- [x] Evaluation harness ([`pipeline/evaluate.py`](pipeline/evaluate.py), [`evaluation/`](evaluation/)): agreement with teacher labels, Cohen's kappa, precision and recall per misconception, marks agreement
+- [ ] Run the evaluation on real, anonymised learner scripts and publish the results, failures included
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception
 
@@ -128,7 +130,7 @@ induction-lab/
 ├── pipeline/             # Verification, tagging, misconception lookup  (done)
 ├── misconceptions/       # Misconception catalogue and mappings  (done)
 ├── tests/                # pytest tests for the pipeline  (done)
-├── evaluation/           # Notebooks and results (planned)
+├── evaluation/           # Teacher-labelled data and results  (template done)
 └── README.md
 ```
 

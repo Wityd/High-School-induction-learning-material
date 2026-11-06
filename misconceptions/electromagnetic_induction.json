@@ -3,7 +3,7 @@
   "subtopic": "Electromagnetic induction (Faraday's Law and Lenz's Law)",
   "grade": 11,
   "curriculum": "CAPS Physical Sciences",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "notes": "Drafted from the wrong options in Induction Lab v1. Add literature references and classroom evidence to each entry before using this for research claims.",
   "misconceptions": [
     {
@@ -398,7 +398,13 @@
           ],
           "working": "N × ε × Δt"
         }
-      ]
+      ],
+      "memo_ticks": [
+        "Formula: ε = −NΔΦ/Δt",
+        "Substitution: 7 = −400ΔΦ/0,08",
+        "Answer: ΔΦ = −1,4 × 10⁻³ Wb"
+      ],
+      "question": "A SQUARE induction coil with a side length 3 cm and 400 windings is placed perpendicularly in a uniform magnetic field and then rotated through an angle of 45° in 0,08 s. An emf of 7 V is induced in the coil. Calculate the change in the magnetic flux. (3)"
     },
     {
       "item_id": "dbe_p1_2018_nov_gr11.11.3",
@@ -452,7 +458,14 @@
           "working": "A = 9 (cm² not converted)"
         }
       ],
-      "proportional_to_source": true
+      "proportional_to_source": true,
+      "memo_ticks": [
+        "Formula: ΔΦ = AB(cos θf − cos θi)",
+        "Substitution of ΔΦ: −0,0014 (or the learner's own 11.2 answer: positive marking)",
+        "Substitution of area and angles: (0,03)²B(cos 45° − cos 0°)",
+        "Answer: B = 5,31 T (or the value consistent with the learner's own 11.2 answer)"
+      ],
+      "question": "Same coil as 11.2 (square, side 3 cm, 400 windings, placed perpendicularly in the field, rotated through 45° in 0,08 s, emf 7 V). Calculate the magnitude of the magnetic field. (4) Positive marking from 11.2."
     }
   ],
   "text_rules": [
