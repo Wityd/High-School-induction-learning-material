@@ -58,7 +58,7 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 - [x] Tagger improved from the teacher check (line-break matching, fewer misleading keywords), with the corrected items kept as tests
 - [x] Past-paper questions linked to misconceptions: Question 11 (13 marks, electromagnetism) mapped item by item in [`misconceptions/paper_links.csv`](misconceptions/paper_links.csv)
 - [x] Question 11 verified against the DBE marking guidelines: answers, tick allocation and positive marking recorded; wrong answers to 11.2 and 11.3 traced to specific misconceptions (e.g. B = 2,20 T means the initial flux was ignored)
-- [ ] Follow positive marking through the engine: mark 11.3 using the learner's own 11.2 answer
+- [x] Positive marking in the engine ([`pipeline/marking.py`](pipeline/marking.py)): 11.3 is marked using the learner's own 11.2 answer, so one mistake is not punished twice, and a new mistake in 11.3 is still found. Method marks for wrong answers are reported as a range until the learner's working is read
 - [ ] Learner working, not just final answers: some wrong numbers (2,20 T) point to two different misconceptions
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception

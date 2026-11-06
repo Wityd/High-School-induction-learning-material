@@ -209,3 +209,53 @@ def test_verified_links_have_memo_answers(cat):
     for row in mc.load_paper_links(cat):
         if row["status"] == "verified":
             assert row["memo_answer"], row["q_id"]
+
+
+# Positive marking: 11.3 is marked using the learner's own 11.2 answer.
+from math import cos, radians
+
+from pipeline.marking import feedback, mark_numeric
+
+K = (0.03 ** 2) * (1 - cos(radians(45)))  # A(cos 0 - cos 45)
+
+
+def mark_q11(cat, dphi, b):
+    r2 = mark_numeric(cat, Q11 + ".2", dphi, max_marks=3)
+    r3 = mark_numeric(cat, Q11 + ".3", b, max_marks=4, source_value=dphi)
+    return r2, r3
+
+
+def test_all_correct(cat):
+    r2, r3 = mark_q11(cat, -0.0014, 5.31)
+    assert (r2["status"], r3["status"]) == ("correct", "correct")
+    assert r2["marks_min"] + r3["marks_min"] == 7
+
+
+def test_wrong_11_2_carried_forward_correctly(cat):
+    """Forgot N in 11.2 (0,56 Wb), then used 0,56 correctly in 11.3."""
+    r2, r3 = mark_q11(cat, 0.56, 0.56 / K)
+    assert [m["id"] for m in r2["misconceptions"]] == ["EMI-08"]
+    assert r3["status"] == "carried_forward"
+    assert r3["marks_min"] == r3["max"] == 4
+    assert r3["misconceptions"] == []  # the 11.2 mistake is not counted twice
+
+
+def test_new_mistake_in_11_3_found_after_carrying_forward(cat):
+    """Wrong 11.2, and in 11.3 also forgot to square the side (EMI-13)."""
+    dphi = 0.56
+    r2, r3 = mark_q11(cat, dphi, dphi / (0.03 * (1 - cos(radians(45)))))
+    assert r3["status"] == "known_error"
+    assert "EMI-13" in [m["id"] for m in r3["misconceptions"]]
+
+
+def test_correct_11_2_but_final_flux_used_in_11_3(cat):
+    r2, r3 = mark_q11(cat, -0.0014, 2.20)
+    assert r2["status"] == "correct"
+    assert "EMI-15" in [m["id"] for m in r3["misconceptions"]]
+    assert (r3["marks_min"], r3["marks_max"], r3["needs_working"]) == (0, 3, True)
+
+
+def test_feedback_reads_like_a_teacher(cat):
+    text = feedback(list(mark_q11(cat, 0.56, 0.56 / K)))
+    assert "11.2:" in text and "EMI-08" in text
+    assert "11.3: 4/4" in text and "positive marking" in text

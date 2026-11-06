@@ -3,7 +3,7 @@
   "subtopic": "Electromagnetic induction (Faraday's Law and Lenz's Law)",
   "grade": 11,
   "curriculum": "CAPS Physical Sciences",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "notes": "Drafted from the wrong options in Induction Lab v1. Add literature references and classroom evidence to each entry before using this for research claims.",
   "misconceptions": [
     {
@@ -413,7 +413,7 @@
       "compare_magnitude": true,
       "tolerance": 0.01,
       "positive_marking_from": "dbe_p1_2018_nov_gr11.11.2",
-      "notes": "Marked with positive marking from 11.2: a learner who carries a wrong 11.2 value correctly into 11.3 still earns the 11.3 marks.",
+      "notes": "Marked with positive marking from 11.2: a learner who carries a wrong 11.2 value correctly into 11.3 still earns the 11.3 marks. B is directly proportional to ΔΦ, so a learner's 11.3 answer can be rescaled to the correct ΔΦ before it is compared with the fingerprints.",
       "fingerprints": [
         {
           "value": 2.2,
@@ -451,7 +451,8 @@
           ],
           "working": "A = 9 (cm² not converted)"
         }
-      ]
+      ],
+      "proportional_to_source": true
     }
   ],
   "text_rules": [
