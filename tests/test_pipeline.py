@@ -355,3 +355,39 @@ def test_report_numbers():
 def test_kappa():
     assert cohen_kappa([True, False, True, False], [True, False, True, False]) == 1.0
     assert cohen_kappa([True, True, False, False], [True, False, True, False]) == 0.0
+
+
+# Constructed challenge set (teacher-checked labels, not learner data).
+import csv as _csv
+from pathlib import Path
+
+from pipeline.marking import mark_numeric as _mark
+
+CHALLENGE = Path(__file__).resolve().parent.parent / "evaluation" / "challenge_set.csv"
+
+
+def _challenge_rows():
+    with open(CHALLENGE, encoding="utf-8", newline="") as f:
+        return list(_csv.DictReader(f))
+
+
+def test_challenge_set_uses_known_ids(cat):
+    known = {m["id"] for m in cat["misconceptions"]}
+    for r in _challenge_rows():
+        assert r["source"] == "constructed"
+        for i in filter(None, r["teacher_ids"].split(";")):
+            assert i in known, (r["case_id"], i)
+
+
+def test_rules_agree_with_teacher_on_numeric_cases(cat):
+    """The final-answer rules reach the teacher's label on every 11.2 and 11.3 case."""
+    for r in _challenge_rows():
+        if not r["item_id"].endswith(("11.2", "11.3")):
+            continue
+        earlier = float(r["earlier_answer"]) if r["earlier_answer"] else None
+        res = _mark(cat, r["item_id"], float(r["final_answer"]), 4, source_value=earlier)
+        teacher = set(filter(None, r["teacher_ids"].split(";")))
+        if teacher:
+            assert teacher & {m["id"] for m in res["misconceptions"]}, r["case_id"]
+        else:
+            assert res["status"] in ("correct", "carried_forward"), r["case_id"]

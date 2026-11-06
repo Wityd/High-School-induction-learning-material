@@ -52,7 +52,7 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 
 - [x] Past-paper extraction verified on one paper (Physical Sciences P1, November 2018): 150 marks, every question total matches the printed total
 - [x] Mark verification and topic tagging moved from the notebook into tested code in [`pipeline/`](pipeline/)
-- [x] First misconception catalogue: 15 electromagnetic induction misconceptions, with every wrong option in the lesson mapped to one ([`misconceptions/electromagnetic_induction.json`](misconceptions/electromagnetic_induction.json))
+- [x] First misconception catalogue: 17 electromagnetic induction misconceptions, with every wrong option in the lesson mapped to one ([`misconceptions/electromagnetic_induction.json`](misconceptions/electromagnetic_induction.json))
 - [x] Numeric fingerprints: a wrong answer to the EMF calculation (e.g. 0,024 V or 0,135 V) is traced to the step that went wrong
 - [x] First paper fully tagged and teacher-checked: 150 of 150 marks (Newton's laws 43, Waves and optics 32, Electrostatics 24, Electric circuits 16, Electromagnetism 15, Vectors 12, Gravitation 8)
 - [x] Tagger improved from the teacher check (line-break matching, fewer misleading keywords), with the corrected items kept as tests
@@ -61,6 +61,8 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 - [x] Positive marking in the engine ([`pipeline/marking.py`](pipeline/marking.py)): 11.3 is marked using the learner's own 11.2 answer, so one mistake is not punished twice, and a new mistake in 11.3 is still found. Method marks for wrong answers are reported as a range until the learner's working is read
 - [x] LLM layer built ([`pipeline/llm_diagnose.py`](pipeline/llm_diagnose.py)): Claude reads a learner's written working, decides which memo ticks it earns and names misconceptions from the catalogue only, quoting the working as evidence. Code then checks the result: invented ids are removed, the tick list must match the memo, and any disagreement with the final-answer rules goes to the teacher
 - [x] Evaluation harness ([`pipeline/evaluate.py`](pipeline/evaluate.py), [`evaluation/`](evaluation/)): agreement with teacher labels, Cohen's kappa, precision and recall per misconception, marks agreement
+- [x] Constructed challenge set ([`evaluation/challenge_set.csv`](evaluation/challenge_set.csv)): 23 teacher-checked cases covering all of Question 11, including two new misconceptions found while building it (EMI-16, EMI-17). Constructed, not learner data
+- [ ] Extend the LLM layer to the text items (11.1, 11.4 to 11.7) so the whole challenge set can be run
 - [ ] Run the evaluation on real, anonymised learner scripts and publish the results, failures included
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception

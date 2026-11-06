@@ -3,7 +3,7 @@
   "subtopic": "Electromagnetic induction (Faraday's Law and Lenz's Law)",
   "grade": 11,
   "curriculum": "CAPS Physical Sciences",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "notes": "Drafted from the wrong options in Induction Lab v1. Add literature references and classroom evidence to each entry before using this for research claims.",
   "misconceptions": [
     {
@@ -160,6 +160,28 @@
       "remediation": "Before substituting, ask for Φ at the start and Φ at the end as two separate numbers, then subtract.",
       "references": [],
       "status": "Confirmed in DBE Grade 11 Physical Sciences P1, November 2018, Question 11 and its marking guidelines."
+    },
+    {
+      "id": "EMI-16",
+      "type": "conceptual",
+      "label": "Confuses Faraday's Law with Lenz's Law",
+      "learner_says": "Faraday's Law: the induced current flows in a direction that opposes the change that caused it.",
+      "correct_idea": "Faraday's Law gives the size of the induced emf (proportional to the rate of change of flux linkage). Lenz's Law gives its direction (opposing the change).",
+      "why_learners_think_this": "The two laws are taught together for the same experiment, and both are 'the induction law' in learners' notes.",
+      "remediation": "Teach them as a pair with one question each: Faraday answers 'how big?', Lenz answers 'which way?'.",
+      "references": [],
+      "status": "Draft: found while building the constructed challenge set (evaluation/challenge_set.csv). Needs classroom or literature evidence."
+    },
+    {
+      "id": "EMI-17",
+      "type": "conceptual",
+      "label": "Moving faster makes the magnet stronger",
+      "learner_says": "The emf increases because the magnetic field becomes stronger when the coil rotates (or the magnet moves) faster.",
+      "correct_idea": "The field strength B stays the same. Moving faster makes the same change in flux happen in less time, so the rate of change of flux, and the emf, increase.",
+      "why_learners_think_this": "They need a cause for the bigger emf and attach it to the most visible quantity, the magnet's strength.",
+      "remediation": "Ask what the magnet is made of and whether that changed. Then compare ΔΦ and Δt for slow and fast movements.",
+      "references": [],
+      "status": "Draft: found while building the constructed challenge set (evaluation/challenge_set.csv). Needs classroom or literature evidence."
     }
   ],
   "item_map": [

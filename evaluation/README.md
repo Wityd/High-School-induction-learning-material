@@ -3,6 +3,16 @@
 Does the LLM label misconceptions the way a teacher does? This folder holds
 the data and results that answer that, honestly.
 
+## 0. Constructed challenge set
+
+`challenge_set.csv` holds 23 cases written to contain one known misconception
+each (or none), with labels checked by the teacher against the memo. It tests
+whether the system **can detect** each misconception. It does **not** measure
+agreement with real learners: that needs real scripts (below). Every row is
+marked `source = constructed`.
+
+So far only the 11.2 and 11.3 rows can be run by the LLM layer.
+
 ## 1. Collect anonymised scripts
 
 For Question 11.2 and 11.3 (DBE Grade 11 P1, November 2018), copy each
