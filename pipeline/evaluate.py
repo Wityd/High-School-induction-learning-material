@@ -46,6 +46,7 @@ def run_llm(client, cat: dict, rows: list) -> list:
         out.append({**row,
                     "llm_ids": ";".join(r.get("misconception_ids", [])),
                     "llm_marks": r.get("marks", ""),
+                    "model": r.get("model", ""),
                     "needs_teacher": r["needs_teacher"],
                     "problems": " | ".join(r.get("problems", []))})
     return out

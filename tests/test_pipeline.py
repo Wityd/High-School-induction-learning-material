@@ -473,3 +473,36 @@ def test_whole_challenge_set_runs(cat):
     assert r["exact_id_agreement"] == 1.0 and r["marks_exact_agreement"] == 1.0
     flagged = [x["case_id"] for x in results if x["needs_teacher"]]
     assert flagged == [], flagged  # teacher labels agree with every strong rule
+
+
+# Open-source backend (Llama through Ollama), with a fake chat function.
+from pipeline.llm_diagnose import OllamaBackend
+
+
+def fake_ollama_chat(content):
+    calls = []
+
+    def chat(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(message=SimpleNamespace(content=content))
+
+    return chat, calls
+
+
+def test_ollama_backend_valid_json(cat):
+    d = Diagnosis(misconception_ids=["EMI-04"], evidence="attracts",
+                  ticks=text_ticks(cat, Q11 + ".6", [False]), confidence="high",
+                  feedback_for_teacher="")
+    chat, calls = fake_ollama_chat(d.model_dump_json())
+    r = diagnose_working(OllamaBackend("llama3.1:8b", chat=chat), cat, Q11 + ".6",
+                         "The coil attracts the magnet.", "SOUTH")
+    assert r["misconception_ids"] == ["EMI-04"] and r["model"] == "llama3.1:8b"
+    assert calls[0]["format"]["title"] == "Diagnosis"  # schema sent to the model
+    assert calls[0]["messages"][0]["role"] == "system"
+
+
+def test_ollama_backend_invalid_json_goes_to_teacher(cat):
+    chat, _ = fake_ollama_chat("Sure! The learner thinks the coil attracts.")
+    r = diagnose_working(OllamaBackend("llama3.1:8b", chat=chat), cat, Q11 + ".6",
+                         "The coil attracts the magnet.", "SOUTH")
+    assert r["needs_teacher"] and "invalid JSON" in r["problems"][0]

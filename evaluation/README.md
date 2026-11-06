@@ -27,6 +27,50 @@ for r in results:
         print(r["case_id"], "| teacher:", r["teacher_ids"], "| AI:", r["llm_ids"], "|", r["problems"])
 ```
 
+### Free option: run it with Llama in Google Colab
+
+No API key and no cost. In Colab, first choose **Runtime → Change runtime
+type → T4 GPU**, then run these cells in order.
+
+Cell 1: install and start Ollama, then download Llama 3.1 8B (about 5 GB, a few minutes):
+
+```python
+!apt-get -qq install -y zstd pciutils > /dev/null
+!curl -fsSL https://ollama.com/install.sh | sh
+import subprocess, time
+subprocess.Popen(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+time.sleep(5)
+!ollama pull llama3.1:8b
+```
+
+Cell 2: get the project and run the challenge set:
+
+```python
+!pip install -q ollama pydantic
+!rm -rf repo && git clone -q https://github.com/Wityd/High-School-induction-learning-material.git repo
+import sys; sys.path.insert(0, "repo")
+
+from pipeline import misconceptions as mc
+from pipeline.llm_diagnose import OllamaBackend
+from pipeline.evaluate import load, run_llm, report
+
+cat = mc.load()
+rows = load("repo/evaluation/challenge_set.csv")
+llama = OllamaBackend("llama3.1:8b")
+
+results = run_llm(llama, cat, rows[:2])      # try 2 first
+# results = run_llm(llama, cat, rows)        # then all 23
+print(report(results))
+for r in results:
+    if r["teacher_ids"] != r["llm_ids"] or str(r["teacher_marks"]) != str(r["llm_marks"]) or r["needs_teacher"]:
+        print(r["case_id"], "| teacher:", r["teacher_ids"] or "-", "| AI:", r["llm_ids"] or "-",
+              "| marks:", r["teacher_marks"], "vs", r["llm_marks"], "|", r["problems"])
+```
+
+To use Claude instead, replace `llama` with `ClaudeBackend(anthropic.Anthropic())`
+(needs an API key). The same code and checks run for both, so the results can
+be compared directly.
+
 ## 1. Collect anonymised scripts
 
 For Question 11.2 and 11.3 (DBE Grade 11 P1, November 2018), copy each

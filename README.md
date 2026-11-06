@@ -63,7 +63,8 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 - [x] Evaluation harness ([`pipeline/evaluate.py`](pipeline/evaluate.py), [`evaluation/`](evaluation/)): agreement with teacher labels, Cohen's kappa, precision and recall per misconception, marks agreement
 - [x] Constructed challenge set ([`evaluation/challenge_set.csv`](evaluation/challenge_set.csv)): 23 teacher-checked cases covering all of Question 11, including two new misconceptions found while building it (EMI-16, EMI-17). Constructed, not learner data
 - [x] LLM layer extended to the text items (definitions, one-word answers, explanations: 11.1, 11.4 to 11.7), so all of Question 11 can be marked. It applies the memo's "2 or 0" rule, gives explanations the learner's earlier answer as context, and notes a right answer reached through wrong reasoning
-- [ ] First real run of the challenge set (needs an Anthropic API key, under $1)
+- [x] Model is swappable: Claude (Anthropic API) or an open-source model such as Llama 3.1 8B (Ollama, free), behind the same checks
+- [ ] First real run of the challenge set with Llama 3.1 8B, then a comparison with Claude
 - [ ] Run the evaluation on real, anonymised learner scripts and publish the results, failures included
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception

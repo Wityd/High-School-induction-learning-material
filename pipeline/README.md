@@ -7,7 +7,7 @@ Python code that turns past papers into a verified, tagged question bank and dia
 | `verify.py` | Checks extracted marks against the `[n]` totals printed on the paper, and separates parent questions ("2.2 Calculate the:") from questions whose marks were lost |
 | `topics.py` | Drafts a topic tag per main question with whole-word keyword matching, and flags close calls with `needs_review` for a teacher to check |
 | `marking.py` | Marks linked calculations with positive marking (e.g. 11.3 from the learner's own 11.2) and writes a teacher report |
-| `llm_diagnose.py` | Sends a learner's written working (calculations, definitions, one-word answers, explanations) to Claude, then checks the answer against the catalogue, the memo ticks and the rule-based engine |
+| `llm_diagnose.py` | Sends a learner's written working (calculations, definitions, one-word answers, explanations) to an LLM (Claude, or Llama through Ollama), then checks the answer against the catalogue, the memo ticks and the rule-based engine |
 | `evaluate.py` | Compares LLM labels and marks with a teacher's (agreement, kappa, precision and recall) |
 | `misconceptions.py` | Loads and validates a catalogue in `misconceptions/`, then maps multiple-choice options, numeric answers and written answers to misconceptions |
 

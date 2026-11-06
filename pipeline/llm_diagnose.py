@@ -22,7 +22,11 @@ The result is then checked by code, never trusted blindly:
   (fingerprints for calculations, answer options for one-word items, keyword
   rules for definitions), and a clear disagreement goes to the teacher.
 
-PRIVACY: learner working is sent to the Anthropic API. Send only anonymised
+The model is swappable: ``ClaudeBackend`` (Anthropic API, paid) or
+``OllamaBackend`` (an open-source model such as Llama, run locally, free).
+The checks below are the same for both.
+
+PRIVACY: with ClaudeBackend, learner working is sent to the Anthropic API. Send only anonymised
 working (no names, no ID numbers, no school), with consent, in line with POPIA.
 """
 from typing import List, Optional, Union
@@ -49,6 +53,65 @@ class Diagnosis(BaseModel):
     ticks: List[TickDecision]
     confidence: str  # "high", "medium" or "low"
     feedback_for_teacher: str
+
+
+class ClaudeBackend:
+    """Claude through the Anthropic API (paid, needs ANTHROPIC_API_KEY)."""
+
+    def __init__(self, client, model: str = MODEL):
+        self.client, self.model = client, model
+        self.name = model
+
+    def diagnose(self, system: str, user: str):
+        response = self.client.beta.messages.parse(
+            model=self.model,
+            max_tokens=16000,
+            output_config={"effort": "medium"},
+            betas=["server-side-fallback-2026-07-01"],
+            fallbacks="default",
+            system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+            messages=[{"role": "user", "content": user}],
+            output_format=Diagnosis,
+        )
+        if response.stop_reason == "refusal" or response.parsed_output is None:
+            return None, f"no diagnosis (stop_reason={response.stop_reason})"
+        return response.parsed_output, None
+
+
+class OllamaBackend:
+    """An open-source model (e.g. Llama) running locally through Ollama. Free.
+
+    Ollama is asked for JSON matching the same Diagnosis schema. Small models
+    sometimes still return invalid JSON; that is caught and sent to the teacher.
+    """
+
+    def __init__(self, model: str = "llama3.1:8b", chat=None):
+        if chat is None:
+            from ollama import chat  # only needed when Ollama is actually used
+        self.chat, self.model = chat, model
+        self.name = model
+
+    def diagnose(self, system: str, user: str):
+        from pydantic import ValidationError
+
+        response = self.chat(
+            model=self.model,
+            messages=[{"role": "system", "content": system},
+                      {"role": "user", "content": user}],
+            format=Diagnosis.model_json_schema(),
+            options={"temperature": 0},  # same answer each run, as a marker should
+        )
+        try:
+            return Diagnosis.model_validate_json(response.message.content), None
+        except ValidationError:
+            return None, "model returned invalid JSON"
+
+
+def as_backend(client_or_backend):
+    """Accept a backend, or a plain anthropic.Anthropic() client."""
+    if hasattr(client_or_backend, "diagnose"):
+        return client_or_backend
+    return ClaudeBackend(client_or_backend)
 
 
 def find_item(cat: dict, item_id: str):
@@ -162,28 +225,22 @@ def diagnose_working(client, cat: dict, item_id: str, working: str, final_answer
                      earlier_answer: Optional[Answer] = None) -> dict:
     """Diagnose one learner's working for one item.
 
-    ``client`` is an ``anthropic.Anthropic()``; tests pass a fake one.
+    ``client`` is a backend (``ClaudeBackend``, ``OllamaBackend``) or a plain
+    ``anthropic.Anthropic()``; tests pass a fake one.
     ``final_answer`` is the learner's final number or word(s), used for the
     rule-based cross-check. ``earlier_answer`` is their answer to the item this
     one depends on (e.g. 11.2 for 11.3, 11.4 for 11.5, 11.6 for 11.7).
     """
     kind, item = find_item(cat, item_id)
-    response = client.beta.messages.parse(
-        model=MODEL,
-        max_tokens=16000,
-        output_config={"effort": "medium"},
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        system=[{"type": "text", "text": system_prompt(cat),
-                 "cache_control": {"type": "ephemeral"}}],
-        messages=[{"role": "user", "content": user_prompt(item, working, earlier_answer)}],
-        output_format=Diagnosis,
-    )
-    if response.stop_reason == "refusal" or response.parsed_output is None:
-        return {"item_id": item_id, "needs_teacher": True,
-                "problems": [f"no diagnosis (stop_reason={response.stop_reason})"]}
+    backend = as_backend(client)
+    diagnosis, error = backend.diagnose(system_prompt(cat),
+                                        user_prompt(item, working, earlier_answer))
+    if diagnosis is None:
+        return {"item_id": item_id, "model": backend.name, "needs_teacher": True,
+                "problems": [error]}
 
-    result = check(cat, item, response.parsed_output)
+    result = check(cat, item, diagnosis)
+    result["model"] = backend.name
     rule = rule_check(cat, kind, item, working, final_answer, earlier_answer)
     llm_ids = set(result["misconception_ids"])
 
@@ -208,4 +265,5 @@ def diagnose_working(client, cat: dict, item_id: str, working: str, final_answer
         "needs_teacher": bool(result["problems"]) or result["confidence"] == "low",
     })
     return result
+
 
