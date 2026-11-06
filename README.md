@@ -2,7 +2,7 @@
 
 **An AI marker that finds learner misconceptions in Grade 11 Physical Sciences exam answers, built and evaluated by a Physical Sciences teacher.**
 
-It marks DBE exam answers against the official memo, names the specific misconception behind a wrong answer, and sends anything it is unsure about to the teacher. It started as an interactive lesson on electromagnetic induction ([live demo](https://high-school-induction-learning-mate.vercel.app)).
+So far it covers **one exam question**: Question 11 (electromagnetic induction, 13 marks) of the DBE Grade 11 Physical Sciences Paper 1, November 2018. It marks learners' answers against the official memo, names the specific misconception behind a wrong answer, and sends anything it is unsure about to the teacher. It started as an interactive lesson on electromagnetic induction ([live demo](https://high-school-induction-learning-mate.vercel.app)).
 
 > "Induction" here means **electromagnetic induction** (Faraday's and Lenz's Laws), not school orientation.
 
@@ -114,7 +114,7 @@ The lesson uses the **Predict–Observe–Explain** model: the learner commits t
 ## Limitations
 
 - **Constructed cases, not learner data.** The 23 cases show what the system can detect. Real, anonymised learner scripts are needed to measure how it performs in a classroom.
-- **Small and narrow.** One question (Question 11) from one paper, one run per model.
+- **Small and narrow.** One question (Question 11) from one paper and one topic, one run per model. The rest of the paper is tagged by topic but not marked.
 - **Changes made after seeing results.** The fixes follow general rules rather than single cases, but new cases are needed to confirm them.
 - **Possible language bias.** Qwen marked one Afrikaans answer down while the same answer in English got full marks. One case proves nothing, but this needs testing in Afrikaans, isiZulu and other languages before any real use.
 - **Draft misconceptions.** EMI-16 and EMI-17 came from the constructed cases and still need classroom or literature evidence.
@@ -184,4 +184,4 @@ GitHub: [@Wityd](https://github.com/Wityd)
 
 ## License
 
-To be added (MIT is a good default for open educational tools).
+[MIT](LICENSE) for the author's own work (code, misconception catalogue, challenge set and documentation). DBE exam and memo material included for marking remains the property of the Department of Basic Education; see [LICENSE](LICENSE).
