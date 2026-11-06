@@ -29,7 +29,7 @@ The checks below are the same for both.
 PRIVACY: with ClaudeBackend, learner working is sent to the Anthropic API. Send only anonymised
 working (no names, no ID numbers, no school), with consent, in line with POPIA.
 """
-from typing import List, Optional, Union
+from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel
 
@@ -42,7 +42,7 @@ Answer = Union[float, str]
 
 
 class TickDecision(BaseModel):
-    tick: str
+    number: int  # memo tick number: 1, 2, 3 ...
     earned: bool
     reason: str
 
@@ -51,7 +51,7 @@ class Diagnosis(BaseModel):
     misconception_ids: List[str]
     evidence: str
     ticks: List[TickDecision]
-    confidence: str  # "high", "medium" or "low"
+    confidence: Literal["high", "medium", "low"]
     feedback_for_teacher: str
 
 
@@ -140,8 +140,8 @@ def system_prompt(cat: dict) -> str:
         "  an empty list. Never invent an id.",
         "- 'evidence' must quote the learner's own working that shows the misconception,",
         "  or say 'no misconception' when the list is empty.",
-        "- Return one tick decision for each memo tick, in the order given, using the",
-        "  tick text exactly as given.",
+        "- Return exactly one tick decision for each memo tick, using the tick's number",
+        "  (1, 2, 3 ...). Do not add ticks the memo does not list.",
         "- Apply positive marking when the memo says so: a wrong earlier answer used",
         "  correctly later earns the later ticks.",
         "- A learner can reach the right answer through wrong reasoning. Award the ticks",
@@ -176,15 +176,22 @@ def check(cat: dict, item: dict, d: Diagnosis) -> dict:
     ids = [i for i in d.misconception_ids if i in known]
     if len(ids) != len(d.misconception_ids):
         problems.append(f"unknown ids removed: {sorted(set(d.misconception_ids) - known)}")
-    if [t.tick for t in d.ticks] != item["memo_ticks"]:
-        problems.append("tick list does not match the memo")
-    marks = sum(t.earned for t in d.ticks)
-    if item.get("all_or_nothing") and marks not in (0, len(item["memo_ticks"])):
-        marks = 0  # memo: 2 or 0
+    memo = item["memo_ticks"]
+    numbers = [t.number for t in d.ticks]
+    if sorted(numbers) == list(range(1, len(memo) + 1)):
+        marks = sum(t.earned for t in d.ticks)
+        if item.get("all_or_nothing") and marks not in (0, len(memo)):
+            marks = 0  # memo: 2 or 0
+    else:
+        # Wrong number of ticks: the marks cannot be trusted, so none are given.
+        problems.append(f"expected ticks 1 to {len(memo)}, got {numbers}")
+        marks = None
+    ticks = [{"tick": memo[t.number - 1] if 1 <= t.number <= len(memo) else f"(no tick {t.number})",
+              "earned": t.earned, "reason": t.reason} for t in d.ticks]
     return {
         "misconception_ids": ids,
         "evidence": d.evidence,
-        "ticks": [t.model_dump() for t in d.ticks],
+        "ticks": ticks,
         "marks": marks,
         "max": len(item["memo_ticks"]),
         "confidence": d.confidence,

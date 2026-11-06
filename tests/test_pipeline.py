@@ -282,7 +282,7 @@ class FakeClient:
 
 def ticks_for(cat, item_id, earned):
     item = next(i for i in cat["numeric_map"] if i["item_id"] == item_id)
-    return [TickDecision(tick=t, earned=e, reason="") for t, e in zip(item["memo_ticks"], earned)]
+    return [TickDecision(number=n, earned=e, reason="") for n, e in enumerate(earned, start=1)]
 
 
 WORKING_EMI15 = "ΔΦ = BA cos 45°\n-0,0014 = B (0,03)² cos 45°\nB = 2,20 T"
@@ -322,10 +322,11 @@ def test_disagreement_with_rules_goes_to_teacher(cat):
 
 def test_wrong_tick_list_and_low_confidence_flagged(cat):
     d = Diagnosis(misconception_ids=[], evidence="no misconception",
-                  ticks=[TickDecision(tick="made up", earned=True, reason="")],
+                  ticks=[TickDecision(number=7, earned=True, reason="")],
                   confidence="low", feedback_for_teacher="")
     r = diagnose_working(FakeClient(d), cat, Q11 + ".2", "7 = 400 x / 0,08", -0.0014)
-    assert r["needs_teacher"] and "memo" in r["problems"][0]
+    assert r["needs_teacher"] and "expected ticks 1 to 3" in r["problems"][0]
+    assert r["marks"] is None
 
 
 def test_refusal_goes_to_teacher(cat):
@@ -398,8 +399,7 @@ from pipeline.llm_diagnose import find_item
 
 
 def text_ticks(cat, item_id, earned):
-    _, item = find_item(cat, item_id)
-    return [TickDecision(tick=t, earned=e, reason="") for t, e in zip(item["memo_ticks"], earned)]
+    return [TickDecision(number=n, earned=e, reason="") for n, e in enumerate(earned, start=1)]
 
 
 def test_one_word_wrong_answer_agrees_with_options(cat):
@@ -506,3 +506,32 @@ def test_ollama_backend_invalid_json_goes_to_teacher(cat):
     r = diagnose_working(OllamaBackend("llama3.1:8b", chat=chat), cat, Q11 + ".6",
                          "The coil attracts the magnet.", "SOUTH")
     assert r["needs_teacher"] and "invalid JSON" in r["problems"][0]
+
+
+# Bugs found by the first Llama run (evaluation/results/llama3.1-8b_v1.csv).
+def test_extra_ticks_never_give_more_marks_than_the_item_has(cat):
+    """CASE_11.5_03 v1: Llama returned 2 ticks for a 1-mark item and scored 2/1."""
+    d = Diagnosis(misconception_ids=["EMI-17"], evidence="field becomes stronger",
+                  ticks=text_ticks(cat, Q11 + ".5", [True, True]), confidence="high",
+                  feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + ".5", "Because the field becomes stronger.",
+                         "Magnetic field increases", earlier_answer="INCREASE")
+    assert r["marks"] is None and r["needs_teacher"]
+
+
+def test_confidence_outside_the_three_levels_is_rejected(cat):
+    """v1: Llama put 'low' in the id list. Confidence is now limited to three values."""
+    bad = ('{"misconception_ids": [], "evidence": "", "ticks": [{"number": 1, "earned": true, '
+           '"reason": ""}], "confidence": "very sure", "feedback_for_teacher": ""}')
+    chat, _ = fake_ollama_chat(bad)
+    r = diagnose_working(OllamaBackend("llama3.1:8b", chat=chat), cat, Q11 + ".6",
+                         "North pole repels.", "NORTH")
+    assert r["needs_teacher"] and "invalid JSON" in r["problems"][0]
+
+
+def test_numbered_ticks_are_shown_with_the_memo_text(cat):
+    d = Diagnosis(misconception_ids=[], evidence="no misconception",
+                  ticks=text_ticks(cat, Q11 + ".6", [True]), confidence="high",
+                  feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + ".6", "North repels north.", "NORTH")
+    assert r["ticks"][0]["tick"] == "NORTH" and r["marks"] == 1
