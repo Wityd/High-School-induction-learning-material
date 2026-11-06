@@ -67,7 +67,8 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 - [x] First real run: Llama 3.1 8B matched 8 of 23 misconception labels (kappa 0.19), with many false alarms on correct work. The rule-based cross-check caught 8 of its errors. Format problems found in the run were fixed. Details: [`evaluation/results/`](evaluation/results/)
 - [x] Second run: Llama returned no ticks at all under JSON mode; the checks gave no marks instead of wrong ones. Fixed by making every memo tick a required field
 - [x] Third run: 11 of 23 labels right (kappa 0.37), marks right on 15 of 23, but 12 errors were not flagged. Fixed by letting the rules set marks wherever the answer is a fixed word, and by counting silent errors
-- [ ] Fourth Llama run, then a comparison with a larger model
+- [x] Fourth run: marks right on 19 of 23 and silent errors down to 5, as estimated beforehand. The remaining errors are the model's own (labels unchanged at 11 of 23)
+- [ ] The same 23 cases on a larger free model, with no changes, to compare
 - [ ] Run the evaluation on real, anonymised learner scripts and publish the results, failures included
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception

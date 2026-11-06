@@ -115,6 +115,33 @@ A caution: these changes were made after seeing results on the same 23 cases.
 They follow a general rule (let rules decide what rules can decide) rather
 than fixes for single cases, but new cases are needed to confirm them.
 
-## Run 4
+## Run 4: Llama 3.1 8B, rules set the marks on one-word answers
 
-To do: Llama 3.1 8B with rule-set marks for one-word answers.
+Files: `llama3.1-8b_v4.csv`, `llama3.1-8b_v4_report.json`
+
+| Measure | Run 1 | Run 2 | Run 3 | Run 4 |
+|---|---|---|---|---|
+| Exact misconception match | 8 of 23 | 8 of 23 | 11 of 23 | 11 of 23 |
+| Cohen's kappa | 0.19 | 0.19 | 0.37 | 0.37 |
+| Marks exactly right | 11 of 23 | none given | 15 of 23 | **19 of 23** |
+| Mean marks difference | 0.74 | none given | 0.43 | **0.26** |
+| Sent to the teacher | 23 | 23 | 5 | 9 |
+| Silent errors | not counted | not counted | 12 (by hand) | **5** |
+
+**The estimate held.** The hand estimate made before this run (silent errors
+from 12 to about 5, all in 11.3 marks and 11.5 explanations) matched exactly:
+the 5 silent errors are 11.3_02 and 11.3_03 (4 of 4 given where the teacher
+gave 2) and 11.5_01 to 11.5_03 (explanations, which no rule can check).
+
+Misconception labels did not change, as expected: only the marking and
+flagging logic changed.
+
+**What is left is the model, not the system.** Llama 3.1 8B still confuses
+EMI-08 with EMI-09, never finds EMI-15, and raises false alarms on correct
+work. Code checks cannot fix that; a stronger model or a better prompt might.
+The 9 items sent to the teacher are the system working as designed.
+
+## Next
+
+Run the same 23 cases, with no changes to the code or prompt, on a larger free
+model to see whether the remaining errors come from model size.
