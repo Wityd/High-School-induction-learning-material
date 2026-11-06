@@ -136,3 +136,76 @@ def test_paper_links_use_known_ids(cat):
     q11 = [r for r in rows if r["q_id"].startswith("11.")]
     assert sum(int(r["marks"]) for r in q11) == 13  # matches the printed [13]
     assert all(r["misconception_ids"] for r in rows)
+
+
+# DBE Grade 11 P1 November 2018, Question 11, checked against the marking guidelines.
+Q11 = "dbe_p1_2018_nov_gr11.11"
+
+
+def test_q11_answers_follow_from_the_question(cat):
+    from math import cos, radians
+
+    q2 = next(i for i in cat["numeric_map"] if i["item_id"] == Q11 + ".2")
+    g = q2["given"]
+    dphi = -g["emf"] * g["delta_t"] / g["N"]  # emf = -N dPhi/dt
+    assert math.isclose(dphi, q2["correct_value"])
+
+    q3 = next(i for i in cat["numeric_map"] if i["item_id"] == Q11 + ".3")
+    g = q3["given"]
+    area = g["side_m"] ** 2
+    b = g["delta_phi"] / (area * (cos(radians(g["theta_f_deg"])) - cos(radians(g["theta_i_deg"]))))
+    assert math.isclose(b, q3["correct_value"], rel_tol=0.01)
+
+
+@pytest.mark.parametrize("value, expected", [
+    (-0.0014, "correct"), (0.0014, "correct"),          # sign shows direction; size is what is compared
+    (0.56, "EMI-08"), (0.21875, "EMI-09"), (224, "EMI-09"),
+])
+def test_q11_2_diagnosis(cat, value, expected):
+    result = mc.diagnose_numeric(cat, Q11 + ".2", value)
+    if expected == "correct":
+        assert result["status"] == "correct"
+    else:
+        assert expected in [m["id"] for m in result["misconceptions"]]
+
+
+@pytest.mark.parametrize("value, expected", [
+    (5.31, "correct"), (2.20, "EMI-15"), (0.1593, "EMI-13"), (0.0531, "EMI-13"), (0.000531, "EMI-13"),
+])
+def test_q11_3_diagnosis(cat, value, expected):
+    result = mc.diagnose_numeric(cat, Q11 + ".3", value)
+    if expected == "correct":
+        assert result["status"] == "correct"
+    else:
+        assert expected in [m["id"] for m in result["misconceptions"]]
+
+
+def test_q11_3_fingerprints_follow_from_the_errors(cat):
+    """Each wrong value is what the named mistake really produces."""
+    from math import cos, radians
+
+    dphi, side, k = 0.0014, 0.03, 1 - cos(radians(45))
+    expected = {
+        "ΔΦ = BA cos 45°": dphi / (side**2 * cos(radians(45))),
+        "ΔΦ = BA (angle ignored)": dphi / side**2,
+        "side not squared": dphi / (side * k),
+        "0,09 m²": dphi / (0.09 * k),
+        "not converted": dphi / (9 * k),
+    }
+    fps = next(i for i in cat["numeric_map"] if i["item_id"] == Q11 + ".3")["fingerprints"]
+    for phrase, value in expected.items():
+        fp = next(f for f in fps if phrase in f["working"])
+        assert math.isclose(fp["value"], value, rel_tol=0.01), phrase
+
+
+def test_q11_word_answers(cat):
+    assert mc.diagnose_choice(cat, Q11 + ".4", "increase") == []
+    assert [m["id"] for m in mc.diagnose_choice(cat, Q11 + ".4", "stay the same")] == ["EMI-06"]
+    assert [m["id"] for m in mc.diagnose_choice(cat, Q11 + ".6", "south")] == ["EMI-04"]
+    assert mc.diagnose_choice(cat, Q11 + ".7", "from a to b") == []
+
+
+def test_verified_links_have_memo_answers(cat):
+    for row in mc.load_paper_links(cat):
+        if row["status"] == "verified":
+            assert row["memo_answer"], row["q_id"]

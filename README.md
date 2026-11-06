@@ -52,12 +52,14 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 
 - [x] Past-paper extraction verified on one paper (Physical Sciences P1, November 2018): 150 marks, every question total matches the printed total
 - [x] Mark verification and topic tagging moved from the notebook into tested code in [`pipeline/`](pipeline/)
-- [x] First misconception catalogue: 14 electromagnetic induction misconceptions, with every wrong option in the lesson mapped to one ([`misconceptions/electromagnetic_induction.json`](misconceptions/electromagnetic_induction.json))
+- [x] First misconception catalogue: 15 electromagnetic induction misconceptions, with every wrong option in the lesson mapped to one ([`misconceptions/electromagnetic_induction.json`](misconceptions/electromagnetic_induction.json))
 - [x] Numeric fingerprints: a wrong answer to the EMF calculation (e.g. 0,024 V or 0,135 V) is traced to the step that went wrong
 - [x] First paper fully tagged and teacher-checked: 150 of 150 marks (Newton's laws 43, Waves and optics 32, Electrostatics 24, Electric circuits 16, Electromagnetism 15, Vectors 12, Gravitation 8)
 - [x] Tagger improved from the teacher check (line-break matching, fewer misleading keywords), with the corrected items kept as tests
-- [x] Past-paper questions linked to misconceptions: Question 11 (13 marks, electromagnetism) mapped item by item in [`misconceptions/paper_links.csv`](misconceptions/paper_links.csv) (draft, pending memo check)
-- [ ] Confirm the Question 11 links and answers against the memorandum
+- [x] Past-paper questions linked to misconceptions: Question 11 (13 marks, electromagnetism) mapped item by item in [`misconceptions/paper_links.csv`](misconceptions/paper_links.csv)
+- [x] Question 11 verified against the DBE marking guidelines: answers, tick allocation and positive marking recorded; wrong answers to 11.2 and 11.3 traced to specific misconceptions (e.g. B = 2,20 T means the initial flux was ignored)
+- [ ] Follow positive marking through the engine: mark 11.3 using the learner's own 11.2 answer
+- [ ] Learner working, not just final answers: some wrong numbers (2,20 T) point to two different misconceptions
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception
 

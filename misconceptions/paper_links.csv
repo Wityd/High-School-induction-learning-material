@@ -1,9 +1,9 @@
-paper_id,q_id,marks,topic,misconception_ids,status,notes
-physci_p1_2018_nov_gr11,1.9,2,Electromagnetism,EMI-05,draft,Field pattern around a straight conductor. Same right-hand-rule foundation as coils having poles
-physci_p1_2018_nov_gr11,11.1,2,Electromagnetism,EMI-02,draft,Faraday's Law in words. Marks need 'rate of change'
-physci_p1_2018_nov_gr11,11.2,3,Electromagnetism,EMI-08;EMI-09;EMI-10,draft,Rearranging emf = N dPhi/dt for the change in flux
-physci_p1_2018_nov_gr11,11.3,4,Electromagnetism,EMI-12;EMI-13,draft,Phi = BA cos theta. Check angle and area units against the stem and memo
-physci_p1_2018_nov_gr11,11.4,1,Electromagnetism,EMI-02;EMI-06,draft,Effect on emf of rotating through 45 degrees in 0.05 s
-physci_p1_2018_nov_gr11,11.5,1,Electromagnetism,EMI-02;EMI-06,draft,Explanation for 11.4. Should reason with rate of change of flux
-physci_p1_2018_nov_gr11,11.6,1,Electromagnetism,EMI-04,draft,Induced pole at X when the north pole is pushed in (Lenz's Law)
-physci_p1_2018_nov_gr11,11.7,1,Electromagnetism,EMI-14,draft,Induced current direction from the induced pole
+paper_id,q_id,marks,topic,misconception_ids,memo_answer,status,notes
+physci_p1_2018_nov_gr11,1.9,2,Electromagnetism,EMI-05,,draft,Field pattern around a straight conductor. Same right-hand-rule foundation as coils having poles. Memo not yet checked
+physci_p1_2018_nov_gr11,11.1,2,Electromagnetism,EMI-02,emf proportional to the rate of change in magnetic flux linkage,verified,Marked 2 or 0
+physci_p1_2018_nov_gr11,11.2,3,Electromagnetism,EMI-08;EMI-09;EMI-10,-1.4e-3 Wb,verified,Rearranging emf = -N dPhi/dt. Minus sign shows flux decreases
+physci_p1_2018_nov_gr11,11.3,4,Electromagnetism,EMI-12;EMI-13;EMI-15,5.31 T,verified,dPhi = AB(cos45 - cos0) with A = (0.03)^2. Positive marking from 11.2. Angle substitution carries its own tick
+physci_p1_2018_nov_gr11,11.4,1,Electromagnetism,EMI-06;EMI-09,INCREASE,verified,Same change in flux in less time
+physci_p1_2018_nov_gr11,11.5,1,Electromagnetism,EMI-06,emf inversely proportional to time,verified,Memo accepts emf proportional to 1/dt. Does not require 'rate of change of flux'
+physci_p1_2018_nov_gr11,11.6,1,Electromagnetism,EMI-04,NORTH,verified,Lenz's Law: X opposes the approaching north pole
+physci_p1_2018_nov_gr11,11.7,1,Electromagnetism,EMI-14,FROM A TO B,verified,Hand rule for a solenoid applied to the induced north pole at X

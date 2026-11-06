@@ -49,12 +49,20 @@ def diagnose_choice(cat: dict, item_id: str, option: str) -> list:
 
 
 def diagnose_numeric(cat: dict, item_id: str, value: float) -> dict:
-    """Classify a numeric answer as correct, a known error pattern, or unknown."""
+    """Classify a numeric answer as correct, a known error pattern, or unknown.
+
+    Items with ``compare_magnitude`` compare sizes only, so -1,4e-3 and 1,4e-3
+    both count as correct. Check the memo for whether the sign earns a mark.
+    """
     item = next(i for i in cat["numeric_map"] if i["item_id"] == item_id)
     tol = item["tolerance"]
 
     def close(a, b):
         return math.isclose(a, b, rel_tol=tol)
+
+    if item.get("compare_magnitude"):
+        value = abs(value)
+        item = {**item, "correct_value": abs(item["correct_value"])}
 
     if close(value, item["correct_value"]):
         return {"status": "correct", "misconceptions": []}

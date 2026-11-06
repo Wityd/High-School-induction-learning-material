@@ -3,7 +3,7 @@
   "subtopic": "Electromagnetic induction (Faraday's Law and Lenz's Law)",
   "grade": 11,
   "curriculum": "CAPS Physical Sciences",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "notes": "Drafted from the wrong options in Induction Lab v1. Add literature references and classroom evidence to each entry before using this for research claims.",
   "misconceptions": [
     {
@@ -121,23 +121,23 @@
       "id": "EMI-12",
       "type": "procedural",
       "label": "Angle measured from the wrong line",
-      "learner_says": "In Φ = BA cos θ, θ is the angle between the field and the plane of the coil.",
+      "learner_says": "The coil is 'placed perpendicularly' in the field, so θ = 90°.",
       "correct_idea": "θ is the angle between the magnetic field and the normal to the coil's surface. A field perpendicular to the coil gives θ = 0° and the largest flux.",
       "why_learners_think_this": "The angle shown on a sketch is often the one with the coil itself, and learners use it without checking.",
       "remediation": "Ask the learner to draw the normal on the sketch before substituting, and check: field along the normal means maximum flux.",
       "references": [],
-      "status": "draft: confirm against the full question and memo"
+      "status": "Confirmed in DBE Grade 11 Physical Sciences P1, November 2018, Question 11 and its marking guidelines."
     },
     {
       "id": "EMI-13",
       "type": "procedural",
       "label": "Area not converted to square metres",
-      "learner_says": "The area is 20 cm², so A = 20 in the formula. (or 20 cm² = 0,2 m²)",
-      "correct_idea": "1 m² = 10⁴ cm², so 20 cm² = 2 × 10⁻³ m². Area converts with the square of the length factor.",
+      "learner_says": "A 3 cm square coil has A = 0,03 m², or A = 9 cm² = 0,09 m².",
+      "correct_idea": "Square the side and convert: (0,03 m)² = 9 × 10⁻⁴ m². 1 m² = 10⁴ cm², so an area converts with the square of the length factor.",
       "why_learners_think_this": "Converting an area like a length (÷100 instead of ÷10 000), or not converting at all.",
       "remediation": "Draw 1 m² as a 100 cm × 100 cm square to show why the factor is 10 000.",
       "references": [],
-      "status": "draft: confirm against the full question and memo"
+      "status": "Confirmed in DBE Grade 11 Physical Sciences P1, November 2018, Question 11 and its marking guidelines."
     },
     {
       "id": "EMI-14",
@@ -148,7 +148,18 @@
       "why_learners_think_this": "Several hand rules are taught in Grade 10 and 11, and learners mix them up.",
       "remediation": "After using Lenz's Law to find the induced pole, apply the solenoid rule as a separate, named second step.",
       "references": [],
-      "status": "draft: confirm against the full question and memo"
+      "status": "Confirmed in DBE Grade 11 Physical Sciences P1, November 2018, Question 11 and its marking guidelines."
+    },
+    {
+      "id": "EMI-15",
+      "type": "conceptual",
+      "label": "Final flux taken as the change in flux",
+      "learner_says": "ΔΦ = BA cos 45°",
+      "correct_idea": "ΔΦ = Φ_final − Φ_initial = BA(cos θ_f − cos θ_i). A coil that starts facing the field already has flux BA through it.",
+      "why_learners_think_this": "They read Δ as 'the flux at the end', the same root as confusing flux with change in flux (EMI-02).",
+      "remediation": "Before substituting, ask for Φ at the start and Φ at the end as two separate numbers, then subtract.",
+      "references": [],
+      "status": "Confirmed in DBE Grade 11 Physical Sciences P1, November 2018, Question 11 and its marking guidelines."
     }
   ],
   "item_map": [
@@ -236,6 +247,64 @@
       "misconceptions": [
         "EMI-05"
       ]
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.4",
+      "option": "INCREASE",
+      "text": "Increase",
+      "correct": true,
+      "misconceptions": []
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.4",
+      "option": "STAY THE SAME",
+      "text": "Stay the same",
+      "correct": false,
+      "misconceptions": [
+        "EMI-06"
+      ]
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.4",
+      "option": "DECREASE",
+      "text": "Decrease",
+      "correct": false,
+      "misconceptions": [
+        "EMI-09"
+      ]
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.6",
+      "option": "NORTH",
+      "text": "North",
+      "correct": true,
+      "misconceptions": []
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.6",
+      "option": "SOUTH",
+      "text": "South",
+      "correct": false,
+      "misconceptions": [
+        "EMI-04"
+      ]
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.7",
+      "option": "FROM A TO B",
+      "text": "From A to B",
+      "correct": true,
+      "misconceptions": []
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.7",
+      "option": "FROM B TO A",
+      "text": "From B to A",
+      "correct": false,
+      "misconceptions": [
+        "EMI-14"
+      ],
+      "notes": "Also expected from a learner who got 11.6 wrong (EMI-04) and then applied the hand rule correctly."
     }
   ],
   "numeric_map": [
@@ -294,6 +363,95 @@
           "working": "minus sign kept on a magnitude"
         }
       ]
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.2",
+      "given": {
+        "N": 400,
+        "emf": 7,
+        "delta_t": 0.08
+      },
+      "unit": "Wb",
+      "correct_value": -0.0014,
+      "compare_magnitude": true,
+      "tolerance": 0.02,
+      "notes": "Memo answer is −1,4 × 10⁻³ Wb: the minus sign shows the flux decreases as the coil turns away from facing the field.",
+      "fingerprints": [
+        {
+          "value": 0.56,
+          "misconceptions": [
+            "EMI-08"
+          ],
+          "working": "ε × Δt (N left out)"
+        },
+        {
+          "value": 0.21875,
+          "misconceptions": [
+            "EMI-09"
+          ],
+          "working": "ε / (N × Δt)"
+        },
+        {
+          "value": 224,
+          "misconceptions": [
+            "EMI-09"
+          ],
+          "working": "N × ε × Δt"
+        }
+      ]
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.3",
+      "given": {
+        "delta_phi": -0.0014,
+        "side_m": 0.03,
+        "theta_i_deg": 0,
+        "theta_f_deg": 45
+      },
+      "unit": "T",
+      "correct_value": 5.31,
+      "compare_magnitude": true,
+      "tolerance": 0.01,
+      "positive_marking_from": "dbe_p1_2018_nov_gr11.11.2",
+      "notes": "Marked with positive marking from 11.2: a learner who carries a wrong 11.2 value correctly into 11.3 still earns the 11.3 marks.",
+      "fingerprints": [
+        {
+          "value": 2.2,
+          "misconceptions": [
+            "EMI-15",
+            "EMI-12"
+          ],
+          "working": "ΔΦ = BA cos 45° (initial flux ignored, or θ taken from the plane). The number alone cannot tell these apart: read the working"
+        },
+        {
+          "value": 1.556,
+          "misconceptions": [
+            "EMI-15"
+          ],
+          "working": "ΔΦ = BA (angle ignored)"
+        },
+        {
+          "value": 0.1593,
+          "misconceptions": [
+            "EMI-13"
+          ],
+          "working": "A = 0,03 m² (side not squared)"
+        },
+        {
+          "value": 0.0531,
+          "misconceptions": [
+            "EMI-13"
+          ],
+          "working": "9 cm² converted as 0,09 m²"
+        },
+        {
+          "value": 0.000531,
+          "misconceptions": [
+            "EMI-13"
+          ],
+          "working": "A = 9 (cm² not converted)"
+        }
+      ]
     }
   ],
   "text_rules": [
@@ -304,6 +462,17 @@
         "rate of change",
         "rate at which",
         "changing"
+      ],
+      "misconceptions": [
+        "EMI-02"
+      ]
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.1",
+      "description": "Faraday's Law in words. Memo: 2 or 0, the answer must say the emf is proportional to the rate of change of flux linkage.",
+      "if_missing_any": [
+        "rate of change",
+        "rate at which"
       ],
       "misconceptions": [
         "EMI-02"
