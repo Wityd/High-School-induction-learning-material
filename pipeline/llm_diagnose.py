@@ -208,3 +208,4 @@ def diagnose_working(client, cat: dict, item_id: str, working: str, final_answer
         "needs_teacher": bool(result["problems"]) or result["confidence"] == "low",
     })
     return result
+
