@@ -21,6 +21,16 @@ def _ids(cell: str) -> set:
     return {i.strip() for i in (cell or "").split(";") if i.strip()}
 
 
+def _number_or_text(cell):
+    """'0.56' -> 0.56, 'NORTH' -> 'NORTH', '' -> None."""
+    if cell is None or str(cell).strip() == "":
+        return None
+    try:
+        return float(cell)
+    except ValueError:
+        return str(cell).strip()
+
+
 def load(path: str) -> list:
     with open(path, encoding="utf-8", newline="") as f:
         return list(csv.DictReader(f))
@@ -30,9 +40,9 @@ def run_llm(client, cat: dict, rows: list) -> list:
     """Diagnose every row with the LLM. Costs money: try a few rows first."""
     out = []
     for row in rows:
-        earlier = float(row["earlier_answer"]) if row.get("earlier_answer") else None
+        earlier = _number_or_text(row.get("earlier_answer"))
         r = diagnose_working(client, cat, row["item_id"], row["working"],
-                             float(row["final_answer"]), earlier)
+                             _number_or_text(row["final_answer"]), earlier)
         out.append({**row,
                     "llm_ids": ";".join(r.get("misconception_ids", [])),
                     "llm_marks": r.get("marks", ""),

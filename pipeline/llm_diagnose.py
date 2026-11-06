@@ -1,24 +1,31 @@
 """Read a learner's written working with Claude and name the misconception.
 
 Final answers alone are not always enough: in Question 11.3, B = 2,20 T can
-come from EMI-15 (initial flux ignored) or EMI-12 (angle taken from the plane).
-Only the working tells them apart. This module asks Claude to:
+come from EMI-15 (initial flux ignored) or EMI-12 (angle taken from the plane),
+and in 11.5 only the explanation shows EMI-17. This module asks Claude to:
 
 1. decide which memo ticks the working earns, and
 2. name misconceptions, choosing ONLY from the catalogue, with a quote from
    the learner's working as evidence.
 
+It handles two kinds of item:
+
+* calculations (``numeric_map`` in the catalogue, e.g. 11.2, 11.3), and
+* text items (``text_items``: definitions, one-word answers, explanations,
+  e.g. 11.1 and 11.4 to 11.7).
+
 The result is then checked by code, never trusted blindly:
 
 * ids not in the catalogue are removed and the result is flagged;
-* the tick list must match the memo;
-* the final answer is also diagnosed by the rule-based fingerprints, and if
-  the two disagree the result goes to the teacher.
+* the tick list must match the memo, and "2 or 0" items are enforced;
+* the final answer is also checked by the rule-based engine where one exists
+  (fingerprints for calculations, answer options for one-word items, keyword
+  rules for definitions), and a clear disagreement goes to the teacher.
 
 PRIVACY: learner working is sent to the Anthropic API. Send only anonymised
 working (no names, no ID numbers, no school), with consent, in line with POPIA.
 """
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -26,6 +33,8 @@ from pipeline import misconceptions as mc
 from pipeline.marking import mark_numeric
 
 MODEL = "claude-opus-5-5"
+
+Answer = Union[float, str]
 
 
 class TickDecision(BaseModel):
@@ -40,6 +49,20 @@ class Diagnosis(BaseModel):
     ticks: List[TickDecision]
     confidence: str  # "high", "medium" or "low"
     feedback_for_teacher: str
+
+
+def find_item(cat: dict, item_id: str):
+    """Return ("numeric" or "text", item) for an item id."""
+    for kind, key in (("numeric", "numeric_map"), ("text", "text_items")):
+        for item in cat.get(key, []):
+            if item["item_id"] == item_id:
+                return kind, item
+    raise KeyError(f"{item_id} is not a calculation or text item in the catalogue")
+
+
+def _short(item_id: str) -> str:
+    """'dbe_p1_2018_nov_gr11.11.3' -> '11.3'."""
+    return ".".join(item_id.rsplit(".", 2)[-2:])
 
 
 def system_prompt(cat: dict) -> str:
@@ -58,6 +81,9 @@ def system_prompt(cat: dict) -> str:
         "  tick text exactly as given.",
         "- Apply positive marking when the memo says so: a wrong earlier answer used",
         "  correctly later earns the later ticks.",
+        "- A learner can reach the right answer through wrong reasoning. Award the ticks",
+        "  the memo gives for the answer, and still name the misconception the reasoning shows.",
+        "- Answers in Afrikaans are marked the same as answers in English.",
         "- Use confidence 'low' when the working is unclear, incomplete or ambiguous.",
         "- feedback_for_teacher: one or two plain sentences a teacher can act on.",
         "",
@@ -69,12 +95,14 @@ def system_prompt(cat: dict) -> str:
     return "\n".join(lines)
 
 
-def user_prompt(item: dict, working: str, earlier_answer: Optional[float]) -> str:
+def user_prompt(item: dict, working: str, earlier_answer: Optional[Answer]) -> str:
     ticks = "\n".join(f"{i + 1}. {t}" for i, t in enumerate(item["memo_ticks"]))
-    earlier = ("" if earlier_answer is None else
-               f"\nThe learner's own answer to {item['positive_marking_from'].rsplit('.', 2)[-2]}."
-               f"{item['positive_marking_from'].rsplit('.', 1)[-1]} was {earlier_answer}.\n")
-    return (f"Question:\n{item['question']}\n\nMemo ticks:\n{ticks}\n{earlier}\n"
+    rule = "\nMemo rule: all ticks or none (2 or 0).\n" if item.get("all_or_nothing") else ""
+    earlier = ""
+    source = item.get("positive_marking_from") or item.get("context_from")
+    if earlier_answer is not None and source:
+        earlier = f"\nThe learner's own answer to {_short(source)} was {earlier_answer}.\n"
+    return (f"Question:\n{item['question']}\n\nMemo ticks:\n{ticks}\n{rule}{earlier}\n"
             f"Learner's working (anonymised):\n<working>\n{working}\n</working>")
 
 
@@ -87,28 +115,59 @@ def check(cat: dict, item: dict, d: Diagnosis) -> dict:
         problems.append(f"unknown ids removed: {sorted(set(d.misconception_ids) - known)}")
     if [t.tick for t in d.ticks] != item["memo_ticks"]:
         problems.append("tick list does not match the memo")
+    marks = sum(t.earned for t in d.ticks)
+    if item.get("all_or_nothing") and marks not in (0, len(item["memo_ticks"])):
+        marks = 0  # memo: 2 or 0
     return {
         "misconception_ids": ids,
         "evidence": d.evidence,
         "ticks": [t.model_dump() for t in d.ticks],
-        "marks": sum(t.earned for t in d.ticks),
+        "marks": marks,
         "max": len(item["memo_ticks"]),
         "confidence": d.confidence,
         "feedback_for_teacher": d.feedback_for_teacher,
         "problems": problems,
+        "notes": [],
     }
 
 
-def diagnose_working(client, cat: dict, item_id: str, working: str, final_answer: float,
-                     earlier_answer: Optional[float] = None) -> dict:
+def rule_check(cat: dict, kind: str, item: dict, working: str, final_answer: Answer,
+               earlier_answer: Optional[Answer]) -> dict:
+    """What the rule-based engine says, and how much to trust it.
+
+    strength "strong": fingerprints or answer options, a clear disagreement
+    goes to the teacher. "weak": a keyword rule, reported only. "none": no rule.
+    """
+    item_id = item["item_id"]
+    if kind == "numeric":
+        earlier = float(earlier_answer) if earlier_answer not in (None, "") else None
+        r = mark_numeric(cat, item_id, float(final_answer), len(item["memo_ticks"]),
+                         source_value=earlier)
+        return {"status": r["status"], "ids": {m["id"] for m in r["misconceptions"]},
+                "strength": "strong"}
+    if any(row["item_id"] == item_id for row in cat.get("item_map", [])):
+        try:
+            found = mc.diagnose_choice(cat, item_id, str(final_answer).strip())
+        except KeyError:
+            return {"status": "unknown", "ids": set(), "strength": "strong"}
+        ids = {m["id"] for m in found}
+        return {"status": "known_error" if ids else "correct", "ids": ids, "strength": "strong"}
+    if any(rule["item_id"] == item_id for rule in cat.get("text_rules", [])):
+        ids = {m["id"] for m in mc.diagnose_text(cat, item_id, working)}
+        return {"status": "known_error" if ids else "unknown", "ids": ids, "strength": "weak"}
+    return {"status": "unknown", "ids": set(), "strength": "none"}
+
+
+def diagnose_working(client, cat: dict, item_id: str, working: str, final_answer: Answer,
+                     earlier_answer: Optional[Answer] = None) -> dict:
     """Diagnose one learner's working for one item.
 
     ``client`` is an ``anthropic.Anthropic()``; tests pass a fake one.
-    ``final_answer`` is the learner's final number, used for the rule-based
-    cross-check. ``earlier_answer`` is their answer to the item this one is
-    positively marked from (e.g. 11.2 when diagnosing 11.3).
+    ``final_answer`` is the learner's final number or word(s), used for the
+    rule-based cross-check. ``earlier_answer`` is their answer to the item this
+    one depends on (e.g. 11.2 for 11.3, 11.4 for 11.5, 11.6 for 11.7).
     """
-    item = next(i for i in cat["numeric_map"] if i["item_id"] == item_id)
+    kind, item = find_item(cat, item_id)
     response = client.beta.messages.parse(
         model=MODEL,
         max_tokens=16000,
@@ -125,21 +184,27 @@ def diagnose_working(client, cat: dict, item_id: str, working: str, final_answer
                 "problems": [f"no diagnosis (stop_reason={response.stop_reason})"]}
 
     result = check(cat, item, response.parsed_output)
-    rule = mark_numeric(cat, item_id, final_answer, len(item["memo_ticks"]),
-                        source_value=earlier_answer)
-    rule_ids = {m["id"] for m in rule["misconceptions"]}
+    rule = rule_check(cat, kind, item, working, final_answer, earlier_answer)
     llm_ids = set(result["misconception_ids"])
-    # Agreement: the rules found nothing to compare against ("unknown"), or the
-    # two share at least one id, or both say the answer is right.
-    agrees = (rule["status"] == "unknown" or bool(rule_ids & llm_ids)
-              or (rule["status"] in ("correct", "carried_forward") and not llm_ids))
-    if not agrees:
-        result["problems"].append(
-            f"disagrees with final-answer rules ({rule['status']}: {sorted(rule_ids)})")
+
+    if rule["strength"] == "strong" and rule["status"] != "unknown":
+        rule_correct = rule["status"] in ("correct", "carried_forward")
+        if rule_correct and llm_ids and kind == "text":
+            # One-word answer is right, but the reasoning shows a misconception.
+            result["notes"].append("right answer, but the reasoning shows a misconception")
+        elif rule_correct and llm_ids:
+            result["problems"].append(
+                f"rules say {rule['status']}, LLM found {sorted(llm_ids)}")
+        elif not rule_correct and not (rule["ids"] & llm_ids):
+            result["problems"].append(
+                f"disagrees with final-answer rules ({rule['status']}: {sorted(rule['ids'])})")
+    elif rule["strength"] == "weak" and rule["ids"] != llm_ids:
+        result["notes"].append(f"keyword rule suggested {sorted(rule['ids'])}")
+
     result.update({
         "item_id": item_id,
         "rule_status": rule["status"],
-        "rule_ids": sorted(rule_ids),
+        "rule_ids": sorted(rule["ids"]),
         "needs_teacher": bool(result["problems"]) or result["confidence"] == "low",
     })
     return result
