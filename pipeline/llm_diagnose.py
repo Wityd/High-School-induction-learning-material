@@ -286,9 +286,19 @@ def diagnose_working(client, cat: dict, item_id: str, working: str, final_answer
 
     if rule["strength"] == "strong" and rule["status"] != "unknown":
         rule_correct = rule["status"] in ("correct", "carried_forward")
+        if kind == "text":
+            # One-word answers: the rules know the right answer, so the rules
+            # give the marks (Run 3: the LLM gave 1 mark to DECREASE, SOUTH
+            # and FROM B TO A). The LLM's job here is only the reasoning.
+            rule_marks = result["max"] if rule_correct else 0
+            if result["marks"] != rule_marks:
+                result["notes"].append(f"LLM gave {result['marks']} marks; rules set {rule_marks}")
+            result["marks"] = rule_marks
         if rule_correct and llm_ids and kind == "text":
-            # One-word answer is right, but the reasoning shows a misconception.
-            result["notes"].append("right answer, but the reasoning shows a misconception")
+            # Right answer, but the LLM sees a misconception in the reasoning.
+            # Either the learner got lucky (CASE_11.7_03) or the LLM is raising
+            # a false alarm (Run 3: 11.6_01, 11.7_02). A teacher decides.
+            result["problems"].append("right answer, but the LLM reports a misconception")
         elif rule_correct and llm_ids:
             result["problems"].append(
                 f"rules say {rule['status']}, LLM found {sorted(llm_ids)}")

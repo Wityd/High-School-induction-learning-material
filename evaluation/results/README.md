@@ -69,6 +69,52 @@ as expected, since the marking instructions were not changed.
 (`tick_1`, `tick_2`, ...), so under JSON mode the model has to give a decision
 for every tick and cannot add extra ones.
 
-## Run 3
+## Run 3: Llama 3.1 8B, required tick fields
 
-To do: Llama 3.1 8B with required tick fields.
+Files: `llama3.1-8b_v3.csv`, `llama3.1-8b_v3_report.json`
+
+| Measure | Run 1 | Run 2 | Run 3 |
+|---|---|---|---|
+| Exact misconception match | 8 of 23 | 8 of 23 | **11 of 23** |
+| Cohen's kappa | 0.19 | 0.19 | **0.37** |
+| Marks exactly right | 11 of 23 | none given | **15 of 23** |
+| Sent to the teacher | 23 | 23 | **5** |
+
+**What improved.** No format errors. All four definitions (11.1) and both
+correct 11.2 calculations were fully right.
+
+**What Run 3 revealed.** With the format fixed, far fewer items were flagged,
+and that exposed a gap in the safety checks: **12 of 23 cases were wrong but
+not sent to the teacher** (silent errors).
+
+- **Generous marks on wrong one-word answers.** DECREASE (11.4_02), SOUTH
+  (11.6_02) and FROM B TO A (11.7_01) each got 1 mark, although the rules
+  already knew these answers were wrong.
+- **False alarms on right one-word answers were only noted.** For example,
+  a correct NORTH (11.6_01) labelled EMI-04.
+- **Generous calculation marks.** 11.3_02 and 11.3_03 got 4 of 4; the
+  teacher gave 2.
+- **Still confused:** EMI-08 vs EMI-09 (forgot N vs. rate handled wrongly), and
+  EMI-15 was never found.
+
+**Changes made after this run.**
+
+1. For one-word answers, the **rules set the marks**: the right word gets the
+   mark, any other word gets none. The LLM's job there is only the reasoning.
+2. A right one-word answer with a reported misconception is now **sent to the
+   teacher**, not just noted: either the learner got lucky (11.7_03) or the
+   LLM raised a false alarm.
+3. The report now counts **silent errors**: items that were wrong and not
+   sent to the teacher. This is the safety number that matters most.
+
+**Estimate before Run 4** (worked out by hand from the Run 3 output, not a
+run): silent errors should fall from 12 to about 5, and the remaining ones
+are in 11.3 marks and 11.5 explanations, where no rule can check the model.
+
+A caution: these changes were made after seeing results on the same 23 cases.
+They follow a general rule (let rules decide what rules can decide) rather
+than fixes for single cases, but new cases are needed to confirm them.
+
+## Run 4
+
+To do: Llama 3.1 8B with rule-set marks for one-word answers.

@@ -351,6 +351,7 @@ def test_report_numbers():
     assert r["per_id"]["EMI-15"]["recall"] == 0.0
     assert r["marks_exact_agreement"] == 0.5 and r["marks_mean_abs_diff"] == 0.5
     assert r["sent_to_teacher"] == 2
+    assert r["silent_errors"] == 0  # both wrong rows were flagged
 
 
 def test_kappa():
@@ -410,7 +411,7 @@ def test_one_word_wrong_answer_agrees_with_options(cat):
     assert r["rule_ids"] == ["EMI-04"] and r["needs_teacher"] is False and r["marks"] == 0
 
 
-def test_right_answer_wrong_reasoning_is_noted_not_flagged(cat):
+def test_right_answer_wrong_reasoning_goes_to_teacher(cat):
     """CASE_11.7_03: FROM A TO B reached from a wrong South pole."""
     d = Diagnosis(misconception_ids=["EMI-04"], evidence="Since end X is a South pole",
                   ticks=text_ticks(cat, Q11 + ".7", [True]), confidence="high",
@@ -418,8 +419,8 @@ def test_right_answer_wrong_reasoning_is_noted_not_flagged(cat):
     client = FakeClient(d)
     r = diagnose_working(client, cat, Q11 + ".7", "Since end X is a South pole, A to B.",
                          "FROM A TO B", earlier_answer="SOUTH")
-    assert r["marks"] == 1 and r["needs_teacher"] is False
-    assert "reasoning" in r["notes"][0]
+    assert r["marks"] == 1 and r["needs_teacher"] is True
+    assert "right answer" in r["problems"][0]
     assert "answer to 11.6 was SOUTH" in client.calls[0]["messages"][0]["content"]
 
 
@@ -472,7 +473,10 @@ def test_whole_challenge_set_runs(cat):
     r = report(results)
     assert r["exact_id_agreement"] == 1.0 and r["marks_exact_agreement"] == 1.0
     flagged = [x["case_id"] for x in results if x["needs_teacher"]]
-    assert flagged == [], flagged  # teacher labels agree with every strong rule
+    # Only CASE_11.7_03 is flagged: right answer, wrong reasoning, which a
+    # teacher should always see. Every other label agrees with the rules.
+    assert flagged == ["CASE_11.7_03"], flagged
+    assert r["silent_errors"] == 0
 
 
 # Open-source backend (Llama through Ollama), with a fake chat function.
@@ -556,3 +560,34 @@ def test_missing_tick_field_is_invalid(cat):
     r = diagnose_working(OllamaBackend("llama3.1:8b", chat=chat), cat, Q11 + ".2",
                          "emf = -N dPhi/dt ...", -0.0014)
     assert r["needs_teacher"] and "invalid JSON" in r["problems"][0]
+
+
+# Found in Run 3: the LLM's marks on one-word answers are replaced by the rules'.
+@pytest.mark.parametrize("item, answer, llm_tick, expected", [
+    (".4", "DECREASE", True, 0),       # Run 3, 11.4_02: LLM gave 1
+    (".6", "SOUTH", True, 0),          # Run 3, 11.6_02: LLM gave 1
+    (".7", "FROM B TO A", True, 0),    # Run 3, 11.7_01: LLM gave 1
+    (".6", "NORTH", False, 1),         # right answer the LLM failed to credit
+])
+def test_rules_set_marks_on_one_word_answers(cat, item, answer, llm_tick, expected):
+    d = Diagnosis(misconception_ids=[], evidence="", ticks=text_ticks(cat, Q11 + item, [llm_tick]),
+                  confidence="high", feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + item, "...", answer)
+    assert r["marks"] == expected
+
+
+def test_false_alarm_on_right_one_word_answer_is_flagged(cat):
+    """Run 3, 11.6_01: NORTH is right, but the LLM reported EMI-04."""
+    d = Diagnosis(misconception_ids=["EMI-04"], evidence="", ticks=text_ticks(cat, Q11 + ".6", [True]),
+                  confidence="high", feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + ".6", "North pole repels north pole.", "NORTH")
+    assert r["needs_teacher"] is True
+
+
+def test_silent_errors_counted():
+    rows = [
+        {"teacher_ids": "EMI-04", "llm_ids": "", "teacher_marks": "0", "llm_marks": "1", "needs_teacher": "False"},
+        {"teacher_ids": "EMI-04", "llm_ids": "", "teacher_marks": "0", "llm_marks": "1", "needs_teacher": "True"},
+        {"teacher_ids": "", "llm_ids": "", "teacher_marks": "1", "llm_marks": "1", "needs_teacher": "False"},
+    ]
+    assert report(rows)["silent_errors"] == 1

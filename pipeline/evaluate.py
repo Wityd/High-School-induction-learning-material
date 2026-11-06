@@ -9,7 +9,8 @@ Input: a CSV with one row per learner per item (see
 * Cohen's kappa on "has a misconception or not" (agreement beyond chance),
 * precision and recall per misconception id,
 * marks: exact agreement and mean absolute difference,
-* how many items the system sent to the teacher.
+* how many items the system sent to the teacher, and
+* silent errors: items that were wrong but NOT sent to the teacher.
 """
 import csv
 from collections import Counter
@@ -90,4 +91,10 @@ def report(rows: list) -> dict:
         "marks_exact_agreement": (sum(a == b for a, b in marked) / len(marked)) if marked else None,
         "marks_mean_abs_diff": (sum(abs(a - b) for a, b in marked) / len(marked)) if marked else None,
         "sent_to_teacher": sum(str(r.get("needs_teacher")) == "True" for r in rows),
+        # The number that matters most for safety: wrong, and nobody was told.
+        "silent_errors": sum(
+            str(r.get("needs_teacher")) != "True"
+            and (_ids(r["teacher_ids"]) != _ids(r["llm_ids"])
+                 or str(r.get("teacher_marks", "")).strip() != str(r.get("llm_marks", "")).strip())
+            for r in rows),
     }
