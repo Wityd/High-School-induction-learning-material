@@ -45,6 +45,30 @@ learner unchecked.
 Only the format problems were fixed. The prompt's marking instructions were not
 changed, so a second run measures the effect of the format fix alone.
 
-## Run 2
+## Run 2: Llama 3.1 8B, ticks by number
 
-To do: Llama 3.1 8B again with the changes above, then compare with Run 1.
+Files: `llama3.1-8b_v2.csv`, `llama3.1-8b_v2_report.json`
+
+| Measure | Run 1 | Run 2 |
+|---|---|---|
+| Exact misconception match | 8 of 23 | 8 of 23 |
+| Cohen's kappa | 0.19 | 0.19 |
+| Marks exactly right | 11 of 23 | none given |
+| Sent to the teacher | 23 of 23 | 23 of 23 |
+
+**What happened.** Llama returned an **empty list of ticks on every item**.
+Under JSON mode the model must follow the schema, and the schema allowed an
+empty list, so the small model took the shortest valid answer. The new check
+did its job: instead of impossible marks (2 out of 1 in Run 1), no marks were
+given and every item went to the teacher.
+
+Misconception labels were almost unchanged (EMI-13 and EMI-16 slightly better),
+as expected, since the marking instructions were not changed.
+
+**Change made after this run.** Each memo tick is now its own required field
+(`tick_1`, `tick_2`, ...), so under JSON mode the model has to give a decision
+for every tick and cannot add extra ones.
+
+## Run 3
+
+To do: Llama 3.1 8B with required tick fields.

@@ -493,11 +493,14 @@ def test_ollama_backend_valid_json(cat):
     d = Diagnosis(misconception_ids=["EMI-04"], evidence="attracts",
                   ticks=text_ticks(cat, Q11 + ".6", [False]), confidence="high",
                   feedback_for_teacher="")
-    chat, calls = fake_ollama_chat(d.model_dump_json())
+    chat, calls = fake_ollama_chat(
+        '{"misconception_ids": ["EMI-04"], "evidence": "attracts", "tick_1": false, '
+        '"tick_reasons": "", "confidence": "high", "feedback_for_teacher": ""}')
     r = diagnose_working(OllamaBackend("llama3.1:8b", chat=chat), cat, Q11 + ".6",
                          "The coil attracts the magnet.", "SOUTH")
     assert r["misconception_ids"] == ["EMI-04"] and r["model"] == "llama3.1:8b"
-    assert calls[0]["format"]["title"] == "Diagnosis"  # schema sent to the model
+    assert r["marks"] == 0 and not r["problems"]
+    assert "tick_1" in calls[0]["format"]["required"]  # schema sent to the model
     assert calls[0]["messages"][0]["role"] == "system"
 
 
@@ -521,8 +524,8 @@ def test_extra_ticks_never_give_more_marks_than_the_item_has(cat):
 
 def test_confidence_outside_the_three_levels_is_rejected(cat):
     """v1: Llama put 'low' in the id list. Confidence is now limited to three values."""
-    bad = ('{"misconception_ids": [], "evidence": "", "ticks": [{"number": 1, "earned": true, '
-           '"reason": ""}], "confidence": "very sure", "feedback_for_teacher": ""}')
+    bad = ('{"misconception_ids": [], "evidence": "", "tick_1": true, "tick_reasons": "", '
+           '"confidence": "very sure", "feedback_for_teacher": ""}')
     chat, _ = fake_ollama_chat(bad)
     r = diagnose_working(OllamaBackend("llama3.1:8b", chat=chat), cat, Q11 + ".6",
                          "North pole repels.", "NORTH")
@@ -535,3 +538,21 @@ def test_numbered_ticks_are_shown_with_the_memo_text(cat):
                   feedback_for_teacher="")
     r = diagnose_working(FakeClient(d), cat, Q11 + ".6", "North repels north.", "NORTH")
     assert r["ticks"][0]["tick"] == "NORTH" and r["marks"] == 1
+
+
+def test_schema_makes_every_tick_required():
+    """Run 2: with a list, Llama returned no ticks. Now each tick is a required field."""
+    from pipeline.llm_diagnose import answer_schema
+
+    schema = answer_schema(4).model_json_schema()
+    assert {"tick_1", "tick_2", "tick_3", "tick_4"} <= set(schema["required"])
+    assert "tick_5" not in schema["properties"]
+
+
+def test_missing_tick_field_is_invalid(cat):
+    chat, _ = fake_ollama_chat(
+        '{"misconception_ids": [], "evidence": "", "tick_1": true, "tick_reasons": "", '
+        '"confidence": "high", "feedback_for_teacher": ""}')  # 11.2 needs tick_1 to tick_3
+    r = diagnose_working(OllamaBackend("llama3.1:8b", chat=chat), cat, Q11 + ".2",
+                         "emf = -N dPhi/dt ...", -0.0014)
+    assert r["needs_teacher"] and "invalid JSON" in r["problems"][0]

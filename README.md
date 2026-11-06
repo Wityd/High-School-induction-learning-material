@@ -65,7 +65,8 @@ Induction Lab uses the **Predict–Observe–Explain (POE)** model, which has st
 - [x] LLM layer extended to the text items (definitions, one-word answers, explanations: 11.1, 11.4 to 11.7), so all of Question 11 can be marked. It applies the memo's "2 or 0" rule, gives explanations the learner's earlier answer as context, and notes a right answer reached through wrong reasoning
 - [x] Model is swappable: Claude (Anthropic API) or an open-source model such as Llama 3.1 8B (Ollama, free), behind the same checks
 - [x] First real run: Llama 3.1 8B matched 8 of 23 misconception labels (kappa 0.19), with many false alarms on correct work. The rule-based cross-check caught 8 of its errors. Format problems found in the run were fixed. Details: [`evaluation/results/`](evaluation/results/)
-- [ ] Second Llama run after the fixes, then a comparison with a larger model
+- [x] Second run: Llama returned no ticks at all under JSON mode; the checks gave no marks instead of wrong ones. Fixed by making every memo tick a required field
+- [ ] Third Llama run with required tick fields, then a comparison with a larger model
 - [ ] Run the evaluation on real, anonymised learner scripts and publish the results, failures included
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception

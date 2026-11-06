@@ -31,7 +31,7 @@ working (no names, no ID numbers, no school), with consent, in line with POPIA.
 """
 from typing import List, Literal, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, create_model
 
 from pipeline import misconceptions as mc
 from pipeline.marking import mark_numeric
@@ -55,6 +55,36 @@ class Diagnosis(BaseModel):
     feedback_for_teacher: str
 
 
+def answer_schema(n_ticks: int):
+    """The schema the model must fill for an item with ``n_ticks`` memo ticks.
+
+    Each tick is its own required field (tick_1, tick_2, ...), so a model under
+    JSON mode cannot skip ticks or add extra ones. Run 2 showed why: with a
+    list, Llama 3.1 8B returned an empty list of ticks on every item.
+    """
+    fields = {
+        "misconception_ids": (List[str], ...),
+        "evidence": (str, ...),
+        **{f"tick_{i}": (bool, ...) for i in range(1, n_ticks + 1)},
+        "tick_reasons": (str, ...),
+        "confidence": (Literal["high", "medium", "low"], ...),
+        "feedback_for_teacher": (str, ...),
+    }
+    return create_model(f"Answer{n_ticks}", **fields)
+
+
+def to_diagnosis(answer, n_ticks: int) -> Diagnosis:
+    """Convert a filled answer schema to a Diagnosis (a Diagnosis passes through)."""
+    if isinstance(answer, Diagnosis):
+        return answer
+    ticks = [TickDecision(number=i, earned=getattr(answer, f"tick_{i}"),
+                          reason=answer.tick_reasons if i == 1 else "")
+             for i in range(1, n_ticks + 1)]
+    return Diagnosis(misconception_ids=answer.misconception_ids, evidence=answer.evidence,
+                     ticks=ticks, confidence=answer.confidence,
+                     feedback_for_teacher=answer.feedback_for_teacher)
+
+
 class ClaudeBackend:
     """Claude through the Anthropic API (paid, needs ANTHROPIC_API_KEY)."""
 
@@ -62,7 +92,7 @@ class ClaudeBackend:
         self.client, self.model = client, model
         self.name = model
 
-    def diagnose(self, system: str, user: str):
+    def diagnose(self, system: str, user: str, schema=Diagnosis):
         response = self.client.beta.messages.parse(
             model=self.model,
             max_tokens=16000,
@@ -71,7 +101,7 @@ class ClaudeBackend:
             fallbacks="default",
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             messages=[{"role": "user", "content": user}],
-            output_format=Diagnosis,
+            output_format=schema,
         )
         if response.stop_reason == "refusal" or response.parsed_output is None:
             return None, f"no diagnosis (stop_reason={response.stop_reason})"
@@ -91,18 +121,18 @@ class OllamaBackend:
         self.chat, self.model = chat, model
         self.name = model
 
-    def diagnose(self, system: str, user: str):
+    def diagnose(self, system: str, user: str, schema=Diagnosis):
         from pydantic import ValidationError
 
         response = self.chat(
             model=self.model,
             messages=[{"role": "system", "content": system},
                       {"role": "user", "content": user}],
-            format=Diagnosis.model_json_schema(),
+            format=schema.model_json_schema(),
             options={"temperature": 0},  # same answer each run, as a marker should
         )
         try:
-            return Diagnosis.model_validate_json(response.message.content), None
+            return schema.model_validate_json(response.message.content), None
         except ValidationError:
             return None, "model returned invalid JSON"
 
@@ -140,8 +170,8 @@ def system_prompt(cat: dict) -> str:
         "  an empty list. Never invent an id.",
         "- 'evidence' must quote the learner's own working that shows the misconception,",
         "  or say 'no misconception' when the list is empty.",
-        "- Return exactly one tick decision for each memo tick, using the tick's number",
-        "  (1, 2, 3 ...). Do not add ticks the memo does not list.",
+        "- For each memo tick, set tick_1, tick_2, ... to true if the working earns that",
+        "  tick (tick_1 is memo tick 1). Explain briefly in tick_reasons.",
         "- Apply positive marking when the memo says so: a wrong earlier answer used",
         "  correctly later earns the later ticks.",
         "- A learner can reach the right answer through wrong reasoning. Award the ticks",
@@ -240,8 +270,11 @@ def diagnose_working(client, cat: dict, item_id: str, working: str, final_answer
     """
     kind, item = find_item(cat, item_id)
     backend = as_backend(client)
-    diagnosis, error = backend.diagnose(system_prompt(cat),
-                                        user_prompt(item, working, earlier_answer))
+    n = len(item["memo_ticks"])
+    answer, error = backend.diagnose(system_prompt(cat),
+                                     user_prompt(item, working, earlier_answer),
+                                     answer_schema(n))
+    diagnosis = None if answer is None else to_diagnosis(answer, n)
     if diagnosis is None:
         return {"item_id": item_id, "model": backend.name, "needs_teacher": True,
                 "problems": [error]}
