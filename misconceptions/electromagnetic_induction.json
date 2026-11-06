@@ -90,9 +90,9 @@
     {
       "id": "EMI-09",
       "type": "procedural",
-      "label": "Multiplies by time instead of dividing",
-      "learner_says": "ε = N × ΔΦ × Δt",
-      "correct_idea": "EMF is a rate, so the change is divided by the time taken.",
+      "label": "Uses time the wrong way round in a rate",
+      "learner_says": "ε = N × ΔΦ × Δt, or ΔΦ = ε / (N × Δt)",
+      "correct_idea": "EMF is a rate: ε = NΔΦ/Δt. Rearranged, ΔΦ = εΔt/N. Time divides the change in ε, so it multiplies when solving for ΔΦ.",
       "why_learners_think_this": "Weak link between 'rate' and division. Same root as EMI-02.",
       "remediation": "Connect to speed = distance / time: any 'rate' divides by time.",
       "references": []

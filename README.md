@@ -4,6 +4,8 @@
 
 So far it covers **one exam question**: Question 11 (electromagnetic induction, 13 marks) of the DBE Grade 11 Physical Sciences Paper 1, November 2018. It marks learners' answers against the official memo, names the specific misconception behind a wrong answer, and sends anything it is unsure about to the teacher. It started as an interactive lesson on electromagnetic induction ([live demo](https://high-school-induction-learning-mate.vercel.app)).
 
+[![Open the demo in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Wityd/High-School-induction-learning-material/blob/main/demo/induction_lab_demo.ipynb) **Try it in your browser:** free, no API key, no GPU, runs in seconds.
+
 > "Induction" here means **electromagnetic induction** (Faraday's and Lenz's Laws), not school orientation.
 
 ---
@@ -78,6 +80,8 @@ learner's working ──► rule engine ─────────────�
 
 ## Run it yourself
 
+**Quickest:** open the [demo notebook](https://colab.research.google.com/github/Wityd/High-School-induction-learning-material/blob/main/demo/induction_lab_demo.ipynb) in Colab and press Run all. It marks example learners, lets you try your own answers and shows the model results, with no API key or GPU.
+
 The tests need no API key and cost nothing:
 
 ```bash
@@ -101,6 +105,7 @@ The lesson uses the **Predict–Observe–Explain** model: the learner commits t
 
 ```
 ├── index.html            # The interactive lesson (v1)
+├── demo/                 # Free Colab demo notebook
 ├── misconceptions/       # Misconception catalogue and past-paper links
 ├── pipeline/             # Rule engine, LLM layer, evaluation, past-paper tools
 ├── evaluation/           # Challenge set, templates and all results
