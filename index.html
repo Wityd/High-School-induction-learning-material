@@ -85,12 +85,12 @@
   .navlinks{display:flex;gap:clamp(14px,2.2vw,34px);margin-left:auto}
   .navlinks a{
     font-size:.92em;
-    color:var(--ink);
+    color:var(--bone);
     text-decoration:none;
     padding-bottom:3px;
     border-bottom:1.5px solid transparent;
   }
-  .navlinks a:hover{border-bottom-color:var(--volt)}
+  .navlinks a:hover{border-bottom-color:var(--bone)}
 
   /* ================= buttons ================= */
   .btn{
@@ -121,12 +121,15 @@
   }
 
   /* ================= hero ================= */
-  .hero{position:relative;padding:clamp(38px,6vw,76px) 0 clamp(50px,7vw,96px)}
+  .hero{position:relative;overflow:hidden;padding:clamp(38px,6vw,76px) 0 clamp(50px,7vw,96px)}  /* the blue never runs into the next section */
   .sweep{
     position:absolute;
-    top:-58vh;
-    right:-30vw;
-    width:104vw;
+    top:-25vh;   /* widest point at the height of the drawing */
+    /* Start the blue after the text column, so all hero text stays on cream.
+       (The text column ends at about 42-45% of the screen, or 60px before the
+       centre on screens wider than the 1240px page.) */
+    left:max(46vw, calc(50vw - 60px));
+    width:96vw;
     height:186vh;
     background:linear-gradient(158deg,var(--volt) 8%,var(--volt-2) 92%);
     border-radius:50%;
@@ -153,7 +156,7 @@
   }
   .steps b{color:var(--ink);font-weight:500}
 
-  .hero-art{position:relative}
+  .hero-art{position:relative;padding-left:clamp(16px,3vw,48px)}  /* keeps the drawing inside the blue */
   .hero-art svg{display:block;width:100%;height:auto;overflow:visible}
 
   .flow{stroke-dasharray:9 11;animation:flow 1.5s linear infinite}
@@ -360,7 +363,15 @@
   @media (max-width:960px){
     .hero-grid{grid-template-columns:1fr}
     .hero-art{order:-1}
-    .sweep{top:-24vh;right:-52vw;width:150vw;height:120vh}
+    /* On phones the drawing sits above the text, so the blue becomes a card
+       behind the drawing only and all text stays on cream. */
+    .sweep{display:none}
+    .hero-art{
+      background:linear-gradient(158deg,var(--volt) 8%,var(--volt-2) 92%);
+      border-radius:22px;
+      padding:26px 18px 18px;
+      margin-top:18px;
+    }
     .bench{grid-template-columns:1fr}
     .reps{grid-template-columns:1fr}
     .term{grid-template-columns:1fr;gap:9px}
@@ -460,9 +471,9 @@
 
           <!-- labels -->
           <text x="8" y="298" font-family="ui-monospace,Menlo,monospace" font-size="11"
-                letter-spacing="2.6" fill="#F04E23">CHANGING FIELD</text>
+                letter-spacing="2.6" fill="#FFC7B5">CHANGING FIELD</text>
           <text x="252" y="330" font-family="ui-monospace,Menlo,monospace" font-size="11"
-                letter-spacing="2.6" fill="#0B1B3A">COIL</text>
+                letter-spacing="2.6" fill="#F7F3EC">COIL</text>
           <text x="470" y="232" font-family="ui-monospace,Menlo,monospace" font-size="11"
                 letter-spacing="2.6" fill="#FFFFFF">INDUCED EMF</text>
         </svg>
