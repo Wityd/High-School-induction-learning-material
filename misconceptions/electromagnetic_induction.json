@@ -3,7 +3,7 @@
   "subtopic": "Electromagnetic induction (Faraday's Law and Lenz's Law)",
   "grade": 11,
   "curriculum": "CAPS Physical Sciences",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "notes": "Drafted from the wrong options in Induction Lab v1. Add literature references and classroom evidence to each entry before using this for research claims.",
   "misconceptions": [
     {
@@ -513,6 +513,49 @@
       "misconceptions": [
         "EMI-02"
       ]
+    }
+  ],
+  "text_items": [
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.1",
+      "question": "State Faraday's law of electromagnetic induction in words. (2)",
+      "memo_ticks": [
+        "The magnitude of the induced emf is directly proportional to",
+        "the rate of change of the magnetic flux linkage with the conductor"
+      ],
+      "all_or_nothing": true,
+      "notes": "Memo: [2 or 0]. Afrikaans answers are accepted."
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.4",
+      "question": "A SQUARE induction coil with a side length 3 cm and 400 windings is placed perpendicularly in a uniform magnetic field and then rotated through an angle of 45° in 0,08 s. An emf of 7 V is induced in the coil. The coil is now rotated through an angle of 45° in 0,05 s. How will the induced emf be affected? Write only INCREASE, DECREASE or STAY THE SAME. (1)",
+      "memo_ticks": [
+        "INCREASE"
+      ]
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.5",
+      "question": "A SQUARE induction coil with a side length 3 cm and 400 windings is placed perpendicularly in a uniform magnetic field and then rotated through an angle of 45° in 0,08 s. An emf of 7 V is induced in the coil. The coil is now rotated through an angle of 45° in 0,05 s. Explain the answer to QUESTION 11.4. (1)",
+      "memo_ticks": [
+        "ε ∝ 1/Δt, or: emf is inversely proportional to time, or: if the time decreases, the emf increases"
+      ],
+      "context_from": "dbe_p1_2018_nov_gr11.11.4"
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.6",
+      "question": "The north pole of a bar magnet is pushed into a solenoid. X is the end of the solenoid facing the magnet; A and B are the ends of the wire. (The sketch shows the winding direction.) Which pole will be induced at point X? Write only NORTH or SOUTH. (1)",
+      "memo_ticks": [
+        "NORTH"
+      ]
+    },
+    {
+      "item_id": "dbe_p1_2018_nov_gr11.11.7",
+      "question": "The north pole of a bar magnet is pushed into a solenoid. X is the end of the solenoid facing the magnet; A and B are the ends of the wire. (The sketch shows the winding direction.) In which direction will the induced current flow? Write only FROM A TO B or FROM B TO A. (1)",
+      "memo_ticks": [
+        "FROM A TO B"
+      ],
+      "context_from": "dbe_p1_2018_nov_gr11.11.6",
+      "notes": "The marker cannot see the winding in this text; the memo answer is FROM A TO B."
     }
   ]
 }

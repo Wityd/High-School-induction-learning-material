@@ -391,3 +391,85 @@ def test_rules_agree_with_teacher_on_numeric_cases(cat):
             assert teacher & {m["id"] for m in res["misconceptions"]}, r["case_id"]
         else:
             assert res["status"] in ("correct", "carried_forward"), r["case_id"]
+
+
+# Text items (11.1, 11.4 to 11.7), with the fake client.
+from pipeline.llm_diagnose import find_item
+
+
+def text_ticks(cat, item_id, earned):
+    _, item = find_item(cat, item_id)
+    return [TickDecision(tick=t, earned=e, reason="") for t, e in zip(item["memo_ticks"], earned)]
+
+
+def test_one_word_wrong_answer_agrees_with_options(cat):
+    d = Diagnosis(misconception_ids=["EMI-04"], evidence="The coil attracts the magnet",
+                  ticks=text_ticks(cat, Q11 + ".6", [False]), confidence="high",
+                  feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + ".6", "The coil attracts the magnet.", "SOUTH")
+    assert r["rule_ids"] == ["EMI-04"] and r["needs_teacher"] is False and r["marks"] == 0
+
+
+def test_right_answer_wrong_reasoning_is_noted_not_flagged(cat):
+    """CASE_11.7_03: FROM A TO B reached from a wrong South pole."""
+    d = Diagnosis(misconception_ids=["EMI-04"], evidence="Since end X is a South pole",
+                  ticks=text_ticks(cat, Q11 + ".7", [True]), confidence="high",
+                  feedback_for_teacher="")
+    client = FakeClient(d)
+    r = diagnose_working(client, cat, Q11 + ".7", "Since end X is a South pole, A to B.",
+                         "FROM A TO B", earlier_answer="SOUTH")
+    assert r["marks"] == 1 and r["needs_teacher"] is False
+    assert "reasoning" in r["notes"][0]
+    assert "answer to 11.6 was SOUTH" in client.calls[0]["messages"][0]["content"]
+
+
+def test_two_or_nothing_is_enforced(cat):
+    d = Diagnosis(misconception_ids=["EMI-02"], evidence="change in magnetic flux",
+                  ticks=text_ticks(cat, Q11 + ".1", [True, False]), confidence="high",
+                  feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + ".1",
+                         "The induced emf is directly proportional to the change in magnetic flux.",
+                         "Faraday's Law")
+    assert r["marks"] == 0  # 1 of 2 ticks is not allowed: 2 or 0
+
+
+def test_explanation_has_no_rule_so_llm_stands(cat):
+    d = Diagnosis(misconception_ids=["EMI-17"], evidence="magnetic field becomes stronger",
+                  ticks=text_ticks(cat, Q11 + ".5", [False]), confidence="high",
+                  feedback_for_teacher="")
+    r = diagnose_working(FakeClient(d), cat, Q11 + ".5", "Because the field becomes stronger.",
+                         "Magnetic field increases", earlier_answer="INCREASE")
+    assert r["rule_status"] == "unknown" and r["needs_teacher"] is False
+
+
+def test_whole_challenge_set_runs(cat):
+    """Every one of the 23 cases goes through the pipeline. The fake client
+    answers with the teacher's own labels, so this tests the wiring, not Claude."""
+    from pipeline.evaluate import load, report, run_llm
+
+    rows = load(str(CHALLENGE))
+    by_working = {r["working"]: r for r in rows}
+
+    class EchoClient(FakeClient):
+        def __init__(self):
+            super().__init__()
+
+            def parse(**kwargs):
+                content = kwargs["messages"][0]["content"]
+                row = next(r for w, r in by_working.items() if w in content)
+                _, item = find_item(cat, row["item_id"])
+                n = int(row["teacher_marks"] or 0)
+                earned = [i < n for i in range(len(item["memo_ticks"]))]
+                return SimpleNamespace(stop_reason="end_turn", parsed_output=Diagnosis(
+                    misconception_ids=[i for i in row["teacher_ids"].split(";") if i],
+                    evidence="", ticks=text_ticks(cat, row["item_id"], earned),
+                    confidence="high", feedback_for_teacher=""))
+
+            self.beta = SimpleNamespace(messages=SimpleNamespace(parse=parse))
+
+    results = run_llm(EchoClient(), cat, rows)
+    assert len(results) == 23
+    r = report(results)
+    assert r["exact_id_agreement"] == 1.0 and r["marks_exact_agreement"] == 1.0
+    flagged = [x["case_id"] for x in results if x["needs_teacher"]]
+    assert flagged == [], flagged  # teacher labels agree with every strong rule

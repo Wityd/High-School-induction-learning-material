@@ -11,7 +11,21 @@ whether the system **can detect** each misconception. It does **not** measure
 agreement with real learners: that needs real scripts (below). Every row is
 marked `source = constructed`.
 
-So far only the 11.2 and 11.3 rows can be run by the LLM layer.
+All 23 rows can be run. To run it in Colab (costs under $1):
+
+```python
+import anthropic
+from pipeline import misconceptions as mc
+from pipeline.evaluate import load, run_llm, report
+
+cat = mc.load()
+rows = load("repo/evaluation/challenge_set.csv")
+results = run_llm(anthropic.Anthropic(), cat, rows)
+print(report(results))
+for r in results:
+    if r["teacher_ids"] != r["llm_ids"] or r["needs_teacher"]:
+        print(r["case_id"], "| teacher:", r["teacher_ids"], "| AI:", r["llm_ids"], "|", r["problems"])
+```
 
 ## 1. Collect anonymised scripts
 

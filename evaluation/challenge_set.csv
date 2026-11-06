@@ -21,4 +21,4 @@ CASE_11.6_01,dbe_p1_2018_nov_gr11.11.6,"The approaching North pole causes an inc
 CASE_11.6_02,dbe_p1_2018_nov_gr11.11.6,The coil attracts the magnet towards it.,SOUTH,,EMI-04,0,W,constructed
 CASE_11.7_01,dbe_p1_2018_nov_gr11.11.7,"Using the right-hand solenoid rule with the thumb pointing left towards the induced North pole at X, the fingers curl downwards at the front windings towards terminal A. Thus current flows from B to A.",FROM B TO A,NORTH,EMI-14,0,W,constructed
 CASE_11.7_02,dbe_p1_2018_nov_gr11.11.7,Current flows from A to B across the solenoid.,FROM A TO B,NORTH,,1,W,constructed
-CASE_11.7_03,dbe_p1_2018_nov_gr11.11.7,"Since end X is a South pole (from 11.6), thumb points right, so current moves from A to B.",FROM A TO B,SOUTH,EMI-04,,W,constructed
+CASE_11.7_03,dbe_p1_2018_nov_gr11.11.7,"Since end X is a South pole (from 11.6), thumb points right, so current moves from A to B.",FROM A TO B,SOUTH,EMI-04,1,W,constructed
