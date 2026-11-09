@@ -33,7 +33,7 @@ HEADER_PATTERNS = [
 QUESTION_NUMBER = re.compile(r"^(\d{1,2}\.\d{1,2}(?:\.\d{1,2})?)\s+(?=\S)", re.M)
 MARKS_AT_END = re.compile(r"\((\d{1,2})\)\s*$", re.M)
 PRINTED_TOTAL = re.compile(r"\n\[\d+\]\s*$")
-PAPER_TOTAL = re.compile(r"^TOTAL:\s*(\d+)", re.M)
+PAPER_TOTAL = re.compile(r"^TOTAL(?:\s*/\s*TOTAAL)?:\s*(\d+)", re.M)  # memos say "TOTAL/TOTAAL: 150"
 
 
 def clean_page(text: str, header_patterns=HEADER_PATTERNS) -> str:

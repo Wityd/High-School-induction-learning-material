@@ -736,3 +736,32 @@ TOTAL: 4
 def test_visible_ticks():
     from pipeline.memo import visible
     assert visible(f"North {T} (1)") == "North ✓ (1)"
+
+
+def test_tick_patterns_from_the_real_memo():
+    """Patterns seen in the real 2018 memo, written as made-up items."""
+    text = clean_page(f"""QUESTION 1/VRAAG 1
+1.1 F net = ma {T} Any one/Enige een
+a = 2 m·s-2 {T}{T}{T}
+OR/OF
+a = 2,0 m·s-2 {T}{T}{T} (4)
+1.2 The ammeter has a low resistance {T}
+OR
+The ammeter short circuits the resistors {T}
+OF
+Die ammeter kortsluit die resistors (1)
+1.3 Free-body diagram: see the sketch (3)
+1.4 Allocation of marks: ray bends towards the normal {T}
+{T}
+{T} (2)
+[10]
+TOTAL/TOTAAL: 10
+DATA THAT MUST BE IGNORED (9)
+""")
+    memo = memo_items(text, "x").set_index("q_id")
+    assert memo.loc["1.1", "tick_status"] == "ok (alternative answers)"  # 1 shared + 3 + 3
+    assert memo.loc["1.2", "tick_status"] == "ok (alternative answers)"  # plain OR / OF lines
+    assert memo.loc["1.3", "tick_status"] == "check"                     # 0 ticks: a diagram
+    assert memo.loc["1.4", "tick_status"] == "check"                     # extra ticks, no alternatives
+    assert list(memo.index) == ["1.1", "1.2", "1.3", "1.4"]             # stops at TOTAL/TOTAAL
+    assert "TOTAAL" not in memo.loc["1.4", "text"]

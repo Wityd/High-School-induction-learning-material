@@ -35,8 +35,9 @@ FIRST_QUESTION = re.compile(r"^QUESTION 1\b", re.M)
 POSITIVE_MARKING = re.compile(r"POSITIVE MARKING FROM QUESTION ([\d.]+)", re.I)
 # The memo is bilingual: "[2 or/of 0]" (found on the real 2018 memo).
 ALL_OR_NOTHING = re.compile(r"\[\s*\d+\s*or(?:\s*/\s*of)?\s*0\s*\]", re.I)
-# Alternative answers: "OPTION 1 ... OPTION 2", or answers joined by "OR/OF".
-ALTERNATIVES = re.compile(r"OPTION\s*2|\bOR\s*/\s*OF\b")
+# Alternative answers: "OPTION 1 ... OPTION 2", answers joined by "OR/OF", or a
+# line with only "OR" or "OF" (all seen on the real 2018 memo).
+ALTERNATIVES = re.compile(r"OPTION\s*2|\bOR\s*/\s*OF\b|^\s*(?:OR|OF)\s*$", re.M)
 
 
 def memo_items(full_text: str, paper_id: str) -> pd.DataFrame:
@@ -60,9 +61,13 @@ def tick_status(row) -> str:
         return "parent"
     if row["ticks"] == row["marks"]:
         return "ok"
-    if row["has_options"] and row["marks"] and row["ticks"] % row["marks"] == 0:
+    if row["ticks"] == 0:
+        return "check"   # e.g. a diagram whose ticks are drawn, not typed (5.1 in 2018)
+    if row["has_options"] and row["ticks"] > row["marks"]:
+        # Alternatives repeat ticks, sometimes after a shared first tick:
+        # 5.2 in 2018 has 1 shared + 3 + 3 = 7 ticks for 4 marks.
         return "ok (alternative answers)"
-    return "check"
+    return "check"   # e.g. a diagram with criteria plus ticks on the drawing (7.4)
 
 
 def match_paper(memo: pd.DataFrame, paper: pd.DataFrame) -> pd.DataFrame:
