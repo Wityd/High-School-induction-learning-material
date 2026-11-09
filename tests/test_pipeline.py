@@ -656,3 +656,62 @@ def test_nothing_is_inferred_when_the_gap_is_ambiguous():
     assert not (df["marks_source"] == "inferred").any()   # 1.1 and 1.2 both missing: no guess
     assert not check.set_index("question").loc[1, "match"]
     assert "do NOT match" in summary(df, check, 14)
+
+
+# Memo reader, on a made-up memo for FAKE_PAPER in the DBE layout.
+from pipeline.memo import match_paper, memo_items, summary as memo_summary
+
+T = ""  # Wingdings tick as pdfplumber reads it
+FAKE_MEMO = f"""MARKING GUIDELINES
+1.1 These notes come before QUESTION 1 and must be ignored. (5)
+QUESTION 1/VRAAG 1
+1.1 B {T}{T} (2)
+1.2 A {T}{T} (2)
+1.3 Faraday's law {T}{T} (2)
+[6]
+Copyright reserved/Kopiereg voorbehou Please turn over/Blaai om asseblief
+Physical Sciences P1/Fisiese Wetenskappe V1 3 DBE/November 2018
+CAPS/KABV – Grade/Graad 11 – Marking Guidelines/Nasienriglyne
+QUESTION 2/VRAAG 2
+2.1 The induced current opposes the change in flux. {T}{T}
+[2 or 0] (2)
+2.2.1 OPTION 1/OPSIE 1 OPTION 2/OPSIE 2
+emf = -N dPhi/dt {T} dPhi = -emf dt / N {T}
+dPhi = 0,01 Wb {T}{T} dPhi = 0,01 Wb {T}{T} (3)
+2.2.2 POSITIVE MARKING FROM QUESTION 2.2.1
+I = V/R {T} = 2 A {T} (3)
+[8]
+TOTAL: 14
+"""
+
+
+def _memo():
+    from pipeline.extract import clean_page as cp
+    from pipeline.memo import MEMO_HEADERS
+    return memo_items(cp(FAKE_MEMO, MEMO_HEADERS), "fake_paper")
+
+
+def test_memo_starts_at_question_1_and_drops_headers():
+    memo = _memo()
+    assert memo["q_id"].tolist() == ["1.1", "1.2", "1.3", "2.1", "2.2.1", "2.2.2"]
+    assert memo.loc[memo["q_id"] == "1.1", "marks"].iloc[0] == 2   # not the (5) before QUESTION 1
+    assert not memo["text"].str.contains("Copyright").any()
+
+
+def test_memo_counts_ticks_options_and_rules():
+    memo = _memo().set_index("q_id")
+    assert memo.loc["1.1", "ticks"] == 2 and memo.loc["1.1", "tick_status"] == "ok"
+    assert memo.loc["2.2.1", "ticks"] == 6 and memo.loc["2.2.1", "tick_status"] == "ok (options)"
+    assert memo.loc["2.2.2", "positive_marking_from"] == "2.2.1"
+    assert memo.loc["2.2.2", "tick_status"] == "check"   # 2 ticks for 3 marks
+    assert memo.loc["2.1", "all_or_nothing"]
+
+
+def test_memo_lines_up_with_the_paper():
+    paper, _, _ = extract_text(clean_page(FAKE_PAPER), "fake_paper")
+    matched = match_paper(_memo(), paper).set_index("q_id")
+    assert matched.loc["2.2", "in"] == "paper only"     # parent: only in the paper
+    assert matched.loc[["1.1", "1.2", "1.3", "2.1", "2.2.1", "2.2.2"], "marks_agree"].all()
+    report = memo_summary(matched.reset_index())
+    assert "Marks agree for every item" in report
+    assert "2.2.2 from 2.2.1" in report and "check these" in report

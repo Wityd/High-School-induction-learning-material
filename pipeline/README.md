@@ -5,6 +5,7 @@ Python code that turns past papers into a verified, tagged question bank and dia
 | Module | What it does |
 |--------|--------------|
 | `extract.py` | Turns a DBE question paper PDF into a list of questions with marks: removes page headers, ignores the data sheet, works out a lost mark from the printed total, and checks every question total |
+| `memo.py` | Reads a DBE marking guideline (memo) PDF and lines it up with the paper: marks per item, ticks counted, OPTION answers, positive marking and "2 or 0" rules |
 | `verify.py` | Checks extracted marks against the `[n]` totals printed on the paper, and separates parent questions ("2.2 Calculate the:") from questions whose marks were lost |
 | `topics.py` | Drafts a topic tag per main question with whole-word keyword matching, and flags close calls with `needs_review` for a teacher to check |
 | `marking.py` | Marks linked calculations with positive marking (e.g. 11.3 from the learner's own 11.2) and writes a teacher report |
@@ -22,6 +23,16 @@ It prints a short report: how many questions, the marks found against the paper
 total, any marks worked out from the printed totals (check these), parent
 questions, and whether every question matches its printed total. The CSV leaves
 out the question text.
+
+## Reading the memo
+
+```bash
+python -m pipeline.memo memo.pdf paper.pdf --paper-id physci_p1_2018_nov_gr11 --out memo.csv
+```
+
+It reports whether every memo item matches a paper question, whether the
+marks agree, how many ticks were counted (items with OPTION 1 and OPTION 2
+repeat their ticks), and which items use positive marking or "2 or 0".
 
 ## Using it from Google Colab
 
