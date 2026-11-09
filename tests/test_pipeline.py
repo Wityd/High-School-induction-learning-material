@@ -829,3 +829,30 @@ def test_diagram_items_are_left_for_the_teacher():
     matched.loc[matched["q_id"] == "1.1", "tick_status"] = "check"   # pretend 1.1 is a diagram
     out = draft_all(FakeDrafter({}), matched, paper, q_ids=["1.1"]).set_index("q_id")
     assert out.loc["1.1", "status"] == "teacher writes"
+
+
+# Fixes from the first real drafting run (Qwen 2.5 14B on Question 11).
+def test_drafter_gets_the_question_introduction():
+    """11.2 lost the 7 V / 400 windings intro, so Qwen could not rebuild the substitution."""
+    matched, paper = _matched_fake()
+    fake = FakeDrafter({"2.2.2": {**GOOD, "tick_1": "Formula: I = V/R",
+                                  "tick_2": "Substitution: 200 turns", "tick_3": "Answer: I = 2 A"}})
+    draft_all(fake, matched, paper, q_ids=["2.2.2"])
+    assert "A coil has 200 turns." in fake.prompts[0]          # the stem
+    assert "2.2.1 the change in flux" in fake.prompts[0]       # the rest of the question
+
+
+def test_same_content_with_different_labels_is_flagged():
+    """11.3: 'Calculation: B = 5,31 T' and 'Answer: B = 5,31 T'."""
+    from pipeline.draft_ticks import check_draft
+    d = {"tick_1": "Formula: x", "tick_2": "Method: B = 5,31 T", "tick_3": "Answer: B = 5,31 T",
+         "answer": "B = 5,31 T", "confidence": "high"}
+    assert "two ticks say the same thing" in check_draft(d, 3, "x B = 5,31 T", "")
+
+
+def test_afrikaans_is_flagged_but_english_is_not():
+    from pipeline.draft_ticks import check_draft
+    noord = {"tick_1": "Answer: North/Noord", "answer": "North", "confidence": "high"}
+    english = {"tick_1": "Explanation: emf is inversely proportional to time", "answer": "", "confidence": "high"}
+    assert any("Noord" in p for p in check_draft(noord, 1, "North/Noord", ""))
+    assert check_draft(english, 1, "Emf is inversely proportional to time.", "") == []

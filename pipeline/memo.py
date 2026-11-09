@@ -44,7 +44,7 @@ def memo_items(full_text: str, paper_id: str) -> pd.DataFrame:
     """One row per memo item: marks, ticks, options, positive marking, 'n or 0'."""
     start = FIRST_QUESTION.search(full_text)
     body, _ = paper_body(full_text[start.start():] if start else full_text)
-    df = split_questions(body, paper_id).drop(columns=["marks_source"])
+    df = split_questions(body, paper_id).drop(columns=["marks_source", "stem"])
     df["marks"] = df["marks"].astype("Int64")
     df["ticks"] = df["text"].apply(lambda t: sum(t.count(c) for c in TICK_CHARS))
     df["has_options"] = df["text"].str.contains(ALTERNATIVES)

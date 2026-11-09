@@ -178,7 +178,8 @@ The lesson uses the **Predict–Observe–Explain** model: the learner commits t
 - [x] Paper extraction moved from Colab into tested code ([`pipeline/extract.py`](pipeline/extract.py)): any DBE paper PDF becomes a checked list of questions and marks with one command. A mark lost in extraction is worked out from the printed question total and labelled for the teacher to check
 - [x] Memo reader ([`pipeline/memo.py`](pipeline/memo.py)): lines a memo PDF up with its paper, compares marks, counts ticks (allowing for alternative answers) and finds positive-marking and "2 or 0" rules. On the real 2018 memo: 62 items lined up, marks agree for every item, 9 positive-marking rules found
 - [x] Memo tick drafting ([`pipeline/draft_ticks.py`](pipeline/draft_ticks.py)): an LLM drafts one "Label: content" description per mark; code flags drafts with missing labels, repeated ticks, or numbers that are not in the memo; diagram items are left for the teacher
-- [ ] Draft the whole 2018 paper and review every draft
+- [x] First drafting run (Qwen 2.5 14B, Question 11): 4 of 7 drafts usable. 11.2 was wrong but passed every check (the right numbers in the wrong arrangement), so the teacher's review cannot be skipped. Fixes: each question's introduction is now kept and given to the drafter, the prompt explains where ticks sit, and new checks catch repeated content and Afrikaans in English drafts
+- [ ] Re-run Question 11, then draft the whole 2018 paper and review every draft
 - [ ] Run the evaluation on real, anonymised learner scripts and publish the results, failures included
 - [ ] More papers, especially ones with electromagnetism questions
 - [ ] Literature references for each misconception

@@ -60,9 +60,25 @@ def paper_body(full_text: str):
     return full_text[:m.start()], int(m.group(1))
 
 
+QUESTION_HEADER = re.compile(r"^QUESTION (\d+)[^\n]*\n", re.M)
+
+
+def question_stems(body: str) -> dict:
+    """The introduction of each main question: the text between "QUESTION n"
+    and its first numbered item (e.g. the coil, 400 windings and 7 V of Question 11).
+    Without it, sub-questions like "Calculate the change in flux" lose their data."""
+    stems = {}
+    for h in QUESTION_HEADER.finditer(body):
+        first_item = QUESTION_NUMBER.search(body, h.end())
+        end = first_item.start() if first_item else len(body)
+        stems[int(h.group(1))] = body[h.end():end].strip()
+    return stems
+
+
 def split_questions(body: str, paper_id: str) -> pd.DataFrame:
     """One row per numbered question or sub-question, with its printed marks."""
     matches = list(QUESTION_NUMBER.finditer(body))
+    stems = question_stems(body)
     rows = []
     for i, m in enumerate(matches):
         end = matches[i + 1].start() if i + 1 < len(matches) else len(body)
@@ -77,6 +93,7 @@ def split_questions(body: str, paper_id: str) -> pd.DataFrame:
             "marks": int(found[-1]) if found else None,
             "marks_source": "printed" if found else "",
             "text": block,
+            "stem": stems.get(int(m.group(1).split(".")[0]), ""),
         })
     return pd.DataFrame(rows)
 
@@ -147,5 +164,5 @@ if __name__ == "__main__":
     print()
     print(checked.to_string(index=False))
     if a.out:
-        questions.drop(columns="text").to_csv(a.out, index=False)
+        questions.drop(columns=["text", "stem"]).to_csv(a.out, index=False)
         print(f"\nSaved {a.out}")

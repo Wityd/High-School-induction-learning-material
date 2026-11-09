@@ -29,7 +29,10 @@ tick descriptions that another marker can apply.
 
 Rules:
 - Give exactly one description per mark: tick_1 is the first mark, tick_2 the
-  second, and so on. The memo shows each mark as a ✓.
+  second, and so on. The memo shows each mark as a ✓, and each ✓ rewards the
+  text just before it. So "-0,0014 ✓ = (0,03)²B(cos 45° - cos 0°) ✓" is two
+  ticks: one for -0,0014 and one for (0,03)²B(cos 45° - cos 0°).
+- Give the final answer only once, in the last tick.
 - Write each description as "Label: content". Use one of these labels:
   {", ".join(LABELS)}.
 - Take the content from the memo. Do not add steps, numbers or answers that
@@ -38,8 +41,17 @@ Rules:
   Rebuild them carefully. If you cannot be sure, say so in notes and use
   confidence "low".
 - Write in English only, even though the memo is also in Afrikaans.
-- If the memo gives alternative answers or methods (OPTION 1/2, OR/OF), write
-  the ticks for the first one and summarise the others in alternatives.
+- If the memo gives alternative methods (OPTION 1/2), write the ticks for the
+  first one and summarise the others in alternatives.
+- If the memo accepts several wordings for the same mark (OR/OF), list them all
+  in that tick, joined by " or ".
+- If the memo says all marks or none (e.g. 2 or 0), the marks are for one
+  statement: split that statement across the ticks, the first part in tick_1
+  and the rest in the later ticks.
+- If positive marking applies, add "(or the learner's own answer to <question>)"
+  to every tick that uses the earlier answer.
+- The question text includes the introduction (the data given in the
+  question). Use it to rebuild scrambled substitutions.
 - answer: the final answer in a few words, e.g. "ΔΦ = −1,4 × 10⁻³ Wb" or "B".
 """
 
@@ -60,11 +72,18 @@ def user_prompt(item, question_text: str) -> str:
         rules.append(f"The memo says: positive marking from question {item['positive_marking_from']}.")
     if item.get("all_or_nothing"):
         rules.append("The memo says: all marks or none (e.g. 2 or 0).")
-    return (f"Question {item['q_id']} ({int(item['marks_memo'])} marks).\n\n"
-            f"Question paper text:\n<question>\n{question_text}\n</question>\n\n"
+    return (f"Question {item['q_id']} ({int(item['marks_memo'])} marks). Draft ticks for {item['q_id']} only.\n\n"
+            f"Question paper text (the whole question, for context):\n<question>\n{question_text}\n</question>\n\n"
             f"Memo text (✓ = one mark):\n<memo>\n{visible(item['text'])}\n</memo>\n"
             + ("\n" + "\n".join(rules) + "\n" if rules else ""))
 
+
+# Common Afrikaans words in memo answers (the memo gives both languages).
+# Only words that are clearly Afrikaans: "is", "die", "van" etc. are left out
+# because they also appear in English drafts.
+AFRIKAANS_WORDS = {"noord", "suid", "toeneem", "afneem", "dieselfde", "nie",
+                   "indien", "wanneer", "weerstand", "stroom", "krag", "spoed",
+                   "versnelling", "groter", "kleiner", "omgekeerd", "eweredig"}
 
 NUMBER = re.compile(r"\d+(?:[.,]\d+)?")
 
@@ -83,8 +102,13 @@ def check_draft(draft: dict, n_marks: int, memo_text: str, question_text: str) -
             problems.append(f"tick {i} is empty")
         elif t.split(":")[0].strip() not in LABELS:
             problems.append(f"tick {i} has no label from the list")
-    if len(set(t.strip().lower() for t in ticks)) < len(ticks):
-        problems.append("two ticks say the same thing")
+    contents = [t.split(":", 1)[-1].strip().lower() for t in ticks]
+    if len(set(contents)) < len(contents):
+        problems.append("two ticks say the same thing")   # even with different labels
+    afrikaans = sorted({w for t in ticks for w in re.findall(r"[A-Za-zë]+", t)
+                        if w.lower() in AFRIKAANS_WORDS})
+    if afrikaans:
+        problems.append(f"Afrikaans words in an English draft: {afrikaans}")
     # Grounding: every number the LLM wrote must appear in the memo or question.
     allowed = _numbers(memo_text) | _numbers(question_text)
     written = _numbers(" ".join(ticks + [draft.get("answer", "")]))
@@ -123,7 +147,11 @@ def draft_all(backend, matched, paper, q_ids=None):
     """
     import pandas as pd
 
-    texts = paper.set_index("q_id")["text"].to_dict()
+    # Context for each main question: its introduction plus all its items.
+    context = {}
+    for q, part in paper.groupby("question"):
+        stem = part["stem"].iloc[0] if "stem" in part else ""
+        context[q] = (stem + "\n" if stem else "") + "\n".join(part["text"])
     rows = []
     for _, item in matched[matched["in"] == "both"].iterrows():
         if q_ids and item["q_id"] not in q_ids:
@@ -133,7 +161,7 @@ def draft_all(backend, matched, paper, q_ids=None):
                          "status": "teacher writes",
                          "problems": "diagram or unclear ticks in the memo"})
             continue
-        rows.append(draft_item(backend, item.to_dict(), texts.get(item["q_id"], "")))
+        rows.append(draft_item(backend, item.to_dict(), context.get(int(item["question"]), "")))
     out = pd.DataFrame(rows)
     out["your_decision"] = ""
     return out
