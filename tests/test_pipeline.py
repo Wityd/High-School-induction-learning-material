@@ -591,3 +591,68 @@ def test_silent_errors_counted():
         {"teacher_ids": "", "llm_ids": "", "teacher_marks": "1", "llm_marks": "1", "needs_teacher": "False"},
     ]
     assert report(rows)["silent_errors"] == 1
+
+
+# PDF extraction (moved from the Colab notebook), on a made-up paper in the DBE layout.
+from pipeline.extract import clean_page, extract_text, summary
+
+FAKE_PAPER = """Physical Sciences/P1 3 DBE/November 2018
+CAPS – Grade 11
+QUESTION 1: MULTIPLE-CHOICE QUESTIONS
+1.1 Which quantity is a vector?
+A mass
+B force (2)
+1.2 The unit of charge is the
+A coulomb
+B volt
+1.3 Which law gives the size of the induced emf? (2)
+[6]
+Copyright reserved Please turn over
+QUESTION 2
+A coil has 200 turns.
+2.1 State Lenz's law. (2)
+2.2 Calculate:
+2.2.1 the change in flux (3)
+2.2.2 the induced current (3)
+[8]
+TOTAL: 14
+DATA FOR PHYSICAL SCIENCES GRADE 11
+g 9,8 m·s-2
+"""
+
+
+def test_headers_are_removed():
+    cleaned = clean_page(FAKE_PAPER)
+    assert "Physical Sciences/P1" not in cleaned and "Copyright reserved" not in cleaned
+    assert "CAPS" not in cleaned and "QUESTION 1" in cleaned
+
+
+def test_extracts_questions_marks_and_checks_totals():
+    df, check, total = extract_text(clean_page(FAKE_PAPER), "fake_paper")
+    assert df["q_id"].tolist() == ["1.1", "1.2", "1.3", "2.1", "2.2", "2.2.1", "2.2.2"]
+    assert total == 14
+    assert int(df["marks"].sum()) == 14
+    assert check["match"].all()
+    assert "DATA FOR" not in " ".join(df["text"])   # data sheet ignored
+    assert "[6]" not in df.loc[df["q_id"] == "1.3", "text"].iloc[0]
+
+
+def test_lost_mark_is_inferred_from_the_printed_total():
+    """Like 1.3 in the 2018 paper: its "(2)" was not read, so [6] - 4 = 2."""
+    df, _, _ = extract_text(clean_page(FAKE_PAPER), "fake_paper")
+    row = df[df["q_id"] == "1.2"].iloc[0]
+    assert row["marks"] == 2 and row["marks_source"] == "inferred"
+    assert (df.loc[df["q_id"] != "1.2", "marks_source"].isin(["printed", ""])).all()
+
+
+def test_parent_question_is_not_given_marks():
+    df, _, _ = extract_text(clean_page(FAKE_PAPER), "fake_paper")
+    assert pd.isna(df.loc[df["q_id"] == "2.2", "marks"].iloc[0])
+
+
+def test_nothing_is_inferred_when_the_gap_is_ambiguous():
+    two_missing = clean_page(FAKE_PAPER).replace("B force (2)", "B force")
+    df, check, _ = extract_text(two_missing, "fake_paper")
+    assert not (df["marks_source"] == "inferred").any()   # 1.1 and 1.2 both missing: no guess
+    assert not check.set_index("question").loc[1, "match"]
+    assert "do NOT match" in summary(df, check, 14)

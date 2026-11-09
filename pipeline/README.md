@@ -4,12 +4,24 @@ Python code that turns past papers into a verified, tagged question bank and dia
 
 | Module | What it does |
 |--------|--------------|
+| `extract.py` | Turns a DBE question paper PDF into a list of questions with marks: removes page headers, ignores the data sheet, works out a lost mark from the printed total, and checks every question total |
 | `verify.py` | Checks extracted marks against the `[n]` totals printed on the paper, and separates parent questions ("2.2 Calculate the:") from questions whose marks were lost |
 | `topics.py` | Drafts a topic tag per main question with whole-word keyword matching, and flags close calls with `needs_review` for a teacher to check |
 | `marking.py` | Marks linked calculations with positive marking (e.g. 11.3 from the learner's own 11.2) and writes a teacher report |
 | `llm_diagnose.py` | Sends a learner's written working (calculations, definitions, one-word answers, explanations) to an LLM (Claude, or Llama through Ollama), then checks the answer against the catalogue, the memo ticks and the rule-based engine |
 | `evaluate.py` | Compares LLM labels and marks with a teacher's (agreement, kappa, precision and recall) |
 | `misconceptions.py` | Loads and validates a catalogue in `misconceptions/`, then maps multiple-choice options, numeric answers and written answers to misconceptions |
+
+## Loading a question paper
+
+```bash
+python -m pipeline.extract paper.pdf --paper-id physci_p1_2018_nov_gr11 --out questions.csv
+```
+
+It prints a short report: how many questions, the marks found against the paper
+total, any marks worked out from the printed totals (check these), parent
+questions, and whether every question matches its printed total. The CSV leaves
+out the question text.
 
 ## Using it from Google Colab
 
