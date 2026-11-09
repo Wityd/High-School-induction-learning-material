@@ -6,6 +6,7 @@ Python code that turns past papers into a verified, tagged question bank and dia
 |--------|--------------|
 | `extract.py` | Turns a DBE question paper PDF into a list of questions with marks: removes page headers, ignores the data sheet, works out a lost mark from the printed total, and checks every question total |
 | `memo.py` | Reads a DBE marking guideline (memo) PDF and lines it up with the paper: marks per item, ticks counted, OPTION answers, positive marking and "2 or 0" rules |
+| `draft_ticks.py` | Has an LLM draft one "Label: content" description per mark for every memo item, checks each draft (labels, repeats, and every number must appear in the memo or question), and leaves diagram items for the teacher |
 | `verify.py` | Checks extracted marks against the `[n]` totals printed on the paper, and separates parent questions ("2.2 Calculate the:") from questions whose marks were lost |
 | `topics.py` | Drafts a topic tag per main question with whole-word keyword matching, and flags close calls with `needs_review` for a teacher to check |
 | `marking.py` | Marks linked calculations with positive marking (e.g. 11.3 from the learner's own 11.2) and writes a teacher report |

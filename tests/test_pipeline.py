@@ -765,3 +765,67 @@ DATA THAT MUST BE IGNORED (9)
     assert memo.loc["1.4", "tick_status"] == "check"                     # extra ticks, no alternatives
     assert list(memo.index) == ["1.1", "1.2", "1.3", "1.4"]             # stops at TOTAL/TOTAAL
     assert "TOTAAL" not in memo.loc["1.4", "text"]
+
+
+# Drafting memo ticks with an LLM (fake backend: no model, no cost).
+from pipeline.draft_ticks import draft_all, draft_schema
+
+
+class FakeDrafter:
+    """Returns a prepared draft for each q_id, filling the real schema."""
+    name = "fake"
+
+    def __init__(self, drafts):
+        self.drafts, self.prompts = drafts, []
+
+    def diagnose(self, system, user, schema):
+        self.prompts.append(user)
+        q_id = user.split()[1]
+        return schema(**self.drafts[q_id]), None
+
+
+def _matched_fake():
+    paper, _, _ = extract_text(clean_page(FAKE_PAPER), "fake_paper")
+    matched = match_paper(_memo(), paper)
+    # FAKE_MEMO gives 2.2.2 only 2 ticks for 3 marks (to test the memo reader);
+    # here we treat its ticks as fine so that it gets drafted.
+    matched.loc[matched["q_id"] == "2.2.2", "tick_status"] = "ok"
+    return matched, paper
+
+
+GOOD = {"answer": "I = 2 A", "alternatives": "", "notes": "", "confidence": "high"}
+
+
+def test_schema_needs_one_tick_per_mark():
+    s = draft_schema(3).model_json_schema()
+    assert {"tick_1", "tick_2", "tick_3"} <= set(s["required"]) and "tick_4" not in s["properties"]
+
+
+def test_good_draft_passes_and_prompt_shows_ticks_and_rules():
+    matched, paper = _matched_fake()
+    fake = FakeDrafter({"2.2.2": {**GOOD, "tick_1": "Formula: I = V/R",
+                                  "tick_2": "Substitution: positive marking from 2.2.1",
+                                  "tick_3": "Answer: I = 2 A"}})
+    out = draft_all(fake, matched, paper, q_ids=["2.2.2"]).set_index("q_id")
+    assert out.loc["2.2.2", "status"] == "draft", out.loc["2.2.2", "problems"]
+    assert out.loc["2.2.2", "draft_ticks"].startswith("1. Formula: I = V/R")
+    assert out.loc["2.2.2", "positive_marking_from"] == "2.2.1"
+    assert "✓" in fake.prompts[0] and "positive marking from question 2.2.1" in fake.prompts[0]
+    assert "your_decision" in out.columns
+
+
+def test_invented_number_and_missing_label_are_flagged():
+    matched, paper = _matched_fake()
+    fake = FakeDrafter({"2.2.2": {**GOOD, "answer": "I = 2,5 A", "tick_1": "Formula: I = V/R",
+                                  "tick_2": "I = 5/2", "tick_3": "Answer: I = 2,5 A"}})
+    row = draft_all(fake, matched, paper, q_ids=["2.2.2"]).iloc[0]
+    assert row["status"] == "check"
+    assert "2,5" in row["problems"] and "5" in row["problems"]   # not in the memo
+    assert "tick 2 has no label" in row["problems"]
+
+
+def test_diagram_items_are_left_for_the_teacher():
+    matched, paper = _matched_fake()
+    matched.loc[matched["q_id"] == "1.1", "tick_status"] = "check"   # pretend 1.1 is a diagram
+    out = draft_all(FakeDrafter({}), matched, paper, q_ids=["1.1"]).set_index("q_id")
+    assert out.loc["1.1", "status"] == "teacher writes"
