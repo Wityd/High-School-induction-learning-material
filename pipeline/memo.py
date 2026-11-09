@@ -33,7 +33,10 @@ MEMO_HEADERS = [
 
 FIRST_QUESTION = re.compile(r"^QUESTION 1\b", re.M)
 POSITIVE_MARKING = re.compile(r"POSITIVE MARKING FROM QUESTION ([\d.]+)", re.I)
-ALL_OR_NOTHING = re.compile(r"\[\s*\d+\s*or\s*0\s*\]", re.I)
+# The memo is bilingual: "[2 or/of 0]" (found on the real 2018 memo).
+ALL_OR_NOTHING = re.compile(r"\[\s*\d+\s*or(?:\s*/\s*of)?\s*0\s*\]", re.I)
+# Alternative answers: "OPTION 1 ... OPTION 2", or answers joined by "OR/OF".
+ALTERNATIVES = re.compile(r"OPTION\s*2|\bOR\s*/\s*OF\b")
 
 
 def memo_items(full_text: str, paper_id: str) -> pd.DataFrame:
@@ -43,7 +46,7 @@ def memo_items(full_text: str, paper_id: str) -> pd.DataFrame:
     df = split_questions(body, paper_id).drop(columns=["marks_source"])
     df["marks"] = df["marks"].astype("Int64")
     df["ticks"] = df["text"].apply(lambda t: sum(t.count(c) for c in TICK_CHARS))
-    df["has_options"] = df["text"].str.contains(r"OPTION\s*2", case=False)
+    df["has_options"] = df["text"].str.contains(ALTERNATIVES)
     df["positive_marking_from"] = df["text"].apply(
         lambda t: (POSITIVE_MARKING.search(t) or [None, ""])[1])
     df["all_or_nothing"] = df["text"].str.contains(ALL_OR_NOTHING)
@@ -58,7 +61,7 @@ def tick_status(row) -> str:
     if row["ticks"] == row["marks"]:
         return "ok"
     if row["has_options"] and row["marks"] and row["ticks"] % row["marks"] == 0:
-        return "ok (options)"
+        return "ok (alternative answers)"
     return "check"
 
 
@@ -75,6 +78,11 @@ def match_paper(memo: pd.DataFrame, paper: pd.DataFrame) -> pd.DataFrame:
         m["marks_paper"].isna() & m["marks_memo"].isna())
     order = m["q_id"].apply(lambda q: [int(x) for x in q.split(".")])
     return m.drop(columns="_merge").iloc[order.argsort()].reset_index(drop=True)
+
+
+def visible(text: str) -> str:
+    """Show the hidden Wingdings ticks as ✓, for a teacher reading memo text."""
+    return text.replace(TICK, "✓")
 
 
 def read_memo(pdf_path: str, paper_id: str) -> pd.DataFrame:
@@ -97,7 +105,7 @@ def summary(matched: pd.DataFrame) -> str:
     pm = matched.loc[matched["positive_marking_from"].fillna("") != "", ["q_id", "positive_marking_from"]]
     if len(pm):
         lines.append("Positive marking: " + ", ".join(f"{a} from {b}" for a, b in pm.values))
-    aon = matched.loc[matched["all_or_nothing"].fillna(False).astype(bool), "q_id"].tolist()
+    aon = matched.loc[matched["all_or_nothing"].eq(True), "q_id"].tolist()
     if aon:
         lines.append(f"All or nothing ('2 or 0'): {aon}")
     return "\n".join(lines)

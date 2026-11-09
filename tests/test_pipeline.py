@@ -674,7 +674,7 @@ Physical Sciences P1/Fisiese Wetenskappe V1 3 DBE/November 2018
 CAPS/KABV – Grade/Graad 11 – Marking Guidelines/Nasienriglyne
 QUESTION 2/VRAAG 2
 2.1 The induced current opposes the change in flux. {T}{T}
-[2 or 0] (2)
+[2 or/of 0] (2)
 2.2.1 OPTION 1/OPSIE 1 OPTION 2/OPSIE 2
 emf = -N dPhi/dt {T} dPhi = -emf dt / N {T}
 dPhi = 0,01 Wb {T}{T} dPhi = 0,01 Wb {T}{T} (3)
@@ -701,7 +701,7 @@ def test_memo_starts_at_question_1_and_drops_headers():
 def test_memo_counts_ticks_options_and_rules():
     memo = _memo().set_index("q_id")
     assert memo.loc["1.1", "ticks"] == 2 and memo.loc["1.1", "tick_status"] == "ok"
-    assert memo.loc["2.2.1", "ticks"] == 6 and memo.loc["2.2.1", "tick_status"] == "ok (options)"
+    assert memo.loc["2.2.1", "ticks"] == 6 and memo.loc["2.2.1", "tick_status"] == "ok (alternative answers)"
     assert memo.loc["2.2.2", "positive_marking_from"] == "2.2.1"
     assert memo.loc["2.2.2", "tick_status"] == "check"   # 2 ticks for 3 marks
     assert memo.loc["2.1", "all_or_nothing"]
@@ -715,3 +715,24 @@ def test_memo_lines_up_with_the_paper():
     report = memo_summary(matched.reset_index())
     assert "Marks agree for every item" in report
     assert "2.2.2 from 2.2.1" in report and "check these" in report
+
+
+def test_bilingual_memo_rules_and_or_of_alternatives():
+    """Found on the real 2018 memo: '[2 or/of 0]', and alternatives joined by 'OR/OF'."""
+    text = clean_page(f"""QUESTION 1/VRAAG 1
+1.1 emf is proportional to the rate of change of flux {T}{T}
+[2 or/of 0] (2)
+1.2 a = 2 m·s-2 {T}{T}
+OR/OF
+a = 2,0 m·s-2 {T}{T} (2)
+[4]
+TOTAL: 4
+""")
+    memo = memo_items(text, "x").set_index("q_id")
+    assert memo.loc["1.1", "all_or_nothing"] and not memo.loc["1.2", "all_or_nothing"]
+    assert memo.loc["1.2", "tick_status"] == "ok (alternative answers)"
+
+
+def test_visible_ticks():
+    from pipeline.memo import visible
+    assert visible(f"North {T} (1)") == "North ✓ (1)"
